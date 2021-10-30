@@ -197,11 +197,11 @@
       "mscorlib.dll": "sha256-7WjHY56PbksCp7YOxNV59r6MqLujjAH8vhnMJ+zVezY=",
       "netstandard.dll": "sha256-5TcSqPhm3fAT6s3NH7+BMGakcfGgZGd3\/\/cVwVs2VPI=",
       "System.Private.CoreLib.dll": "sha256-VJv3DLM\/G0m\/RnTeWL9X8mkbxlsn8nNRhm0BHYEY+uo=",
-      "WebGL_Playground_Site.dll": "sha256-JlhkVMIpKtLBwk9hIXimVbUuaCP0CW2dx0KH2h5f7Jw="
+      "WebGL_Playground_Site.dll": "sha256-GUnK0473V3OIzmVZyh\/eEZpLZTlmPxQxasOrldknLI8="
     },
     "lazyAssembly": null,
     "pdb": {
-      "WebGL_Playground_Site.pdb": "sha256-jwscb7LtKLqDlWD0dbV5CNAMrbuU5doqGYC\/wphXFDo="
+      "WebGL_Playground_Site.pdb": "sha256-sRh6+2hoMuiY4AzfhXgOTe9qnUXRDPFXKpJsybbLUIE="
     },
     "runtime": {
       "dotnet.timezones.blat": "sha256-PvlHrby1PYtdX46ITs6pB8iDNqXNcewh8Eoa\/Gm2+GM=",

@@ -81,6 +81,7 @@ Welcome to your new app.
         var data = GenerateTriangles(count);
 
         await DrawTriangles(data.Item1, data.Item2);
+        Console.WriteLine("Done drawing");
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender) {
