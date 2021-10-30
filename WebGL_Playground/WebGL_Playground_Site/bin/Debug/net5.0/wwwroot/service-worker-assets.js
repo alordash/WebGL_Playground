@@ -5,7 +5,7 @@
       "url": "_content\/Blazor.Extensions.Canvas\/blazor.extensions.canvas.js"
     },
     {
-      "hash": "sha256-KVCjHezh8n7u5mqVAHqeA05zuPa43M25yGAAf6\/eIRM=",
+      "hash": "sha256-g1tuM7hN2yNJ\/I70pGd3DyugGR6JNspvvSY9X948P3k=",
       "url": "_framework\/blazor.boot.json"
     },
     {
@@ -797,11 +797,11 @@
       "url": "_framework\/dotnet.5.0.10.js"
     },
     {
-      "hash": "sha256-DNGhlItiKwraYzXQn67bmWPFVLcefI0CC59mQrN82ro=",
+      "hash": "sha256-JlhkVMIpKtLBwk9hIXimVbUuaCP0CW2dx0KH2h5f7Jw=",
       "url": "_framework\/WebGL_Playground_Site.dll"
     },
     {
-      "hash": "sha256-XZFohJkgtusfJiWMsL6HwN1Bnn+EM+xWfxx+OgZqhWg=",
+      "hash": "sha256-jwscb7LtKLqDlWD0dbV5CNAMrbuU5doqGYC\/wphXFDo=",
       "url": "_framework\/WebGL_Playground_Site.pdb"
     },
     {
@@ -1681,5 +1681,5 @@
       "url": "WebGL_Playground_Site.bundle.scp.css"
     }
   ],
-  "version": "odg4RJb\/"
+  "version": "BrrAuoS7"
 };

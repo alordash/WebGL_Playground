@@ -119,11 +119,13 @@ using WebGLWrapping;
         }
         #pragma warning restore 1998
 #nullable restore
-#line 14 "D:\Documents\PROJECTS\Blazor\WebGL_Playground\WebGL_Playground\WebGL_Playground_Site\Pages\Index.razor"
+#line 18 "D:\Documents\PROJECTS\Blazor\WebGL_Playground\WebGL_Playground\WebGL_Playground_Site\Pages\Index.razor"
        
     private BECanvasComponent canvasReference;
     private WebGLContext gl;
     private GLProgram glProgram;
+
+    private NumberInput trianglesCount;
 
     private bool needsRendering = true;
 
@@ -137,18 +139,7 @@ using WebGLWrapping;
         }
     }
 
-    private async Task Draw() {
-
-        // -–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-
-        var vertices = new[] {
-            0f,   0.7f,
-            0.5f,  -0.7f,
-            -0.5f,  -0.7f,
-            0.12f, -0.34f,
-            -1f, 0.7f,
-            0.6f, -0.2f
-        };
-
+    private async Task DrawTriangles(float[] vertices, byte[] colors) {
         var positionBuffer = await gl.CreateBufferAsync();
         await gl.BindBufferAsync(BufferType.ARRAY_BUFFER, positionBuffer);
         await gl.BufferDataAsync(BufferType.ARRAY_BUFFER, vertices, BufferUsageHint.STATIC_DRAW);
@@ -157,25 +148,44 @@ using WebGLWrapping;
         await gl.EnableVertexAttribArrayAsync(positionLoc);
         await gl.VertexAttribPointerAsync(positionLoc, 2, DataType.FLOAT, false, 0, 0);
 
-        // -–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-
-        var vertexColors = new byte[] {
-            255, 0, 0, 255,
-            0, 255, 0, 255,
-            0, 0, 255, 255,
-            100, 100, 100, 255,
-            0, 255, 0, 255,
-            0, 0, 255, 255,
-        };
-
         var colorBuffer = await gl.CreateBufferAsync();
         await gl.BindBufferAsync(BufferType.ARRAY_BUFFER, colorBuffer);
-        await gl.BufferDataAsync(BufferType.ARRAY_BUFFER, vertexColors, BufferUsageHint.STATIC_DRAW);
+        await gl.BufferDataAsync(BufferType.ARRAY_BUFFER, colors, BufferUsageHint.STATIC_DRAW);
 
         var colorLoc = (uint)await gl.GetAttribLocationAsync(glProgram.Program, "color");
         await gl.EnableVertexAttribArrayAsync(colorLoc);
         await gl.VertexAttribPointerAsync(colorLoc, 4, DataType.UNSIGNED_BYTE, true, 0, 0);
 
-        await gl.DrawArraysAsync(Primitive.TRIANGLES, 0, 6);
+        await gl.DrawArraysAsync(Primitive.TRIANGLES, 0, vertices.Length);
+    }
+
+    private Tuple<float[], byte[]> GenerateTriangles(int count) {
+        var vertices = new float[6 * count];
+        var colors = new byte[12 * count];
+
+        var rnd = new Random();
+
+        for(int i = 0; i < vertices.Length; i++) {
+            vertices[i] = (float)(rnd.NextDouble() * 2.0 - 1.0);
+        }
+        for(int i = 0; i < colors.Length; i++) {
+            colors[i] = (byte)rnd.Next(0, 255);
+        }
+
+        return new Tuple<float[], byte[]>(vertices, colors);
+    }
+
+    protected async Task Draw() {
+        await gl.ViewportAsync(0, 0, (int)canvasReference.Width, (int)canvasReference.Height);
+        await gl.ClearColorAsync(0.0f, 0.0f, 0.0f, 1.0f);
+
+        await gl.ClearAsync(BufferBits.COLOR_BUFFER_BIT);
+
+        var count = (int)trianglesCount.Value;
+
+        var data = GenerateTriangles(count);
+
+        await DrawTriangles(data.Item1, data.Item2);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender) {
@@ -187,11 +197,6 @@ using WebGLWrapping;
 
             glProgram = await GLProgram.SetUpProgram(vertShaderSource, fragShaderSource);
             await gl.UseProgramAsync(glProgram);
-
-            await gl.ViewportAsync(0, 0, (int)canvasReference.Width, (int)canvasReference.Height);
-            await gl.ClearColorAsync(0.0f, 0.0f, 0.0f, 1.0f);
-
-            await gl.ClearAsync(BufferBits.COLOR_BUFFER_BIT);
 
             await Draw();
 

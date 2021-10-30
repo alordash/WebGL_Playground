@@ -640,3 +640,5 @@ D:\Documents\PROJECTS\Blazor\WebGL_Playground\WebGL_Playground\WebGL_Playground_
 D:\Documents\PROJECTS\Blazor\WebGL_Playground\WebGL_Playground\WebGL_Playground_Site\obj\Debug\net5.0\WebGL_Playground_Site.pdb
 D:\Documents\PROJECTS\Blazor\WebGL_Playground\WebGL_Playground\WebGL_Playground_Site\obj\Debug\net5.0\serviceworkers\wwwroot\service-worker.js
 D:\Documents\PROJECTS\Blazor\WebGL_Playground\WebGL_Playground\WebGL_Playground_Site\obj\Debug\net5.0\service-worker-assets.js
+D:\Documents\PROJECTS\Blazor\WebGL_Playground\WebGL_Playground\WebGL_Playground_Site\obj\Debug\net5.0\RazorDeclaration\Pages\NumberInput.razor.g.cs
+D:\Documents\PROJECTS\Blazor\WebGL_Playground\WebGL_Playground\WebGL_Playground_Site\obj\Debug\net5.0\Razor\Pages\NumberInput.razor.g.cs
