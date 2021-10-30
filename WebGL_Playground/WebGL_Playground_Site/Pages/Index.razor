@@ -1,0 +1,92 @@
+﻿@page "/"
+@using Blazor.Extensions.Canvas.WebGL;
+@using WebGLWrapping;
+@inject HttpClient Http
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+<SurveyPrompt Title="How is Blazor working for you?" />
+
+<BECanvas Width="400" Height="300" @ref="canvasReference"></BECanvas>
+
+@code {
+    private BECanvasComponent canvasReference;
+    private WebGLContext gl;
+    private GLProgram glProgram;
+
+    private bool needsRendering = true;
+
+    private async Task<String> GetFileContents(string sourcePath) {
+        string source;
+        try {
+            source = await Http.GetStringAsync(sourcePath);
+            return source;
+        } catch(Exception e) {
+            throw new Exception(e.Message);
+        }
+    }
+
+    private async Task Draw() {
+
+        // -–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-
+        var vertices = new[] {
+            0f,   0.7f,
+            0.5f,  -0.7f,
+            -0.5f,  -0.7f,
+            0.12f, -0.34f,
+            -1f, 0.7f,
+            0.6f, -0.2f
+        };
+
+        var positionBuffer = await gl.CreateBufferAsync();
+        await gl.BindBufferAsync(BufferType.ARRAY_BUFFER, positionBuffer);
+        await gl.BufferDataAsync(BufferType.ARRAY_BUFFER, vertices, BufferUsageHint.STATIC_DRAW);
+
+        var positionLoc = (uint)await gl.GetAttribLocationAsync(glProgram.Program, "position");
+        await gl.EnableVertexAttribArrayAsync(positionLoc);
+        await gl.VertexAttribPointerAsync(positionLoc, 2, DataType.FLOAT, false, 0, 0);
+
+        // -–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-–—–-
+        var vertexColors = new byte[] {
+            255, 0, 0, 255,
+            0, 255, 0, 255,
+            0, 0, 255, 255,
+            100, 100, 100, 255,
+            0, 255, 0, 255,
+            0, 0, 255, 255,
+        };
+
+        var colorBuffer = await gl.CreateBufferAsync();
+        await gl.BindBufferAsync(BufferType.ARRAY_BUFFER, colorBuffer);
+        await gl.BufferDataAsync(BufferType.ARRAY_BUFFER, vertexColors, BufferUsageHint.STATIC_DRAW);
+
+        var colorLoc = (uint)await gl.GetAttribLocationAsync(glProgram.Program, "color");
+        await gl.EnableVertexAttribArrayAsync(colorLoc);
+        await gl.VertexAttribPointerAsync(colorLoc, 4, DataType.UNSIGNED_BYTE, true, 0, 0);
+
+        await gl.DrawArraysAsync(Primitive.TRIANGLES, 0, 6);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender) {
+        if(needsRendering) {
+            gl = GLContext.GL = await canvasReference.CreateWebGLAsync(new WebGLContextAttributes { PowerPreference = WebGLContextAttributes.POWER_PREFERENCE_HIGH_PERFORMANCE });
+
+            var vertShaderSource = await GetFileContents("Shaders/shader.vert");
+            var fragShaderSource = await GetFileContents("Shaders/shader.frag");
+
+            glProgram = await GLProgram.SetUpProgram(vertShaderSource, fragShaderSource);
+            await gl.UseProgramAsync(glProgram);
+
+            await gl.ViewportAsync(0, 0, (int)canvasReference.Width, (int)canvasReference.Height);
+            await gl.ClearColorAsync(0.0f, 0.0f, 0.0f, 1.0f);
+
+            await gl.ClearAsync(BufferBits.COLOR_BUFFER_BIT);
+
+            await Draw();
+
+            needsRendering = false;
+        }
+    }
+}
