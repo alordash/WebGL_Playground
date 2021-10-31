@@ -119,7 +119,7 @@ using WebGLWrapping;
         }
         #pragma warning restore 1998
 #nullable restore
-#line 18 "D:\Documents\PROJECTS\Blazor\WebGL_Playground\WebGL_Playground\WebGL_Playground_Site\Pages\Index.razor"
+#line 14 "D:\Documents\PROJECTS\Blazor\WebGL_Playground\WebGL_Playground\WebGL_Playground_Site\Pages\Index.razor"
        
     private BECanvasComponent canvasReference;
     private WebGLContext gl;

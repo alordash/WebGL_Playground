@@ -5,7 +5,7 @@
       "url": "_content\/Blazor.Extensions.Canvas\/blazor.extensions.canvas.js"
     },
     {
-      "hash": "sha256-C0PbZP6kUx1ypS8cvVUUmL1q+IYGNdDZ+ag5TguBADY=",
+      "hash": "sha256-R7N376jf66uTHL7hVHha2SyWuMkJMPtVh0Y9As0zYeM=",
       "url": "_framework\/blazor.boot.json"
     },
     {
@@ -797,11 +797,11 @@
       "url": "_framework\/dotnet.5.0.10.js"
     },
     {
-      "hash": "sha256-GUnK0473V3OIzmVZyh\/eEZpLZTlmPxQxasOrldknLI8=",
+      "hash": "sha256-hMkf2W6wnQ+KY1zrHeAoygBk8zKYan2Lr75WsPGLd1s=",
       "url": "_framework\/WebGL_Playground_Site.dll"
     },
     {
-      "hash": "sha256-sRh6+2hoMuiY4AzfhXgOTe9qnUXRDPFXKpJsybbLUIE=",
+      "hash": "sha256-yusX9EKmWbNCGfDMbe9FSP5dnqIkft9bkL9Df8JNQUI=",
       "url": "_framework\/WebGL_Playground_Site.pdb"
     },
     {
@@ -1661,10 +1661,6 @@
       "url": "manifest.json"
     },
     {
-      "hash": "sha256-yzFf+O\/mlH+Q9klUSqXP2kxGKOUFLPxaww8da8fKhGU=",
-      "url": "sample-data\/weather.json"
-    },
-    {
       "hash": "sha256-gzHFGVonzwPDW\/LciLuiDCxbzYpU7u2XwitEiUWw224=",
       "url": "Shaders\/shader.frag"
     },
@@ -1681,5 +1677,5 @@
       "url": "WebGL_Playground_Site.bundle.scp.css"
     }
   ],
-  "version": "0EpqqshF"
+  "version": "msGaYJeM"
 };

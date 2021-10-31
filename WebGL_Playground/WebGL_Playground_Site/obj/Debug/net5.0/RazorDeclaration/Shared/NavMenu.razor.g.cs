@@ -104,7 +104,7 @@ using Blazor.Extensions.Canvas;
         }
         #pragma warning restore 1998
 #nullable restore
-#line 28 "D:\Documents\PROJECTS\Blazor\WebGL_Playground\WebGL_Playground\WebGL_Playground_Site\Shared\NavMenu.razor"
+#line 23 "D:\Documents\PROJECTS\Blazor\WebGL_Playground\WebGL_Playground\WebGL_Playground_Site\Shared\NavMenu.razor"
        
     private bool collapseNavMenu = true;
 
