@@ -14,7 +14,7 @@
 @code {
     private BECanvasComponent canvasReference;
     private WebGLContext gl;
-    private GLProgram glProgram;
+    private GLDrawer glDrawer;
 
     private NumberInput trianglesCount;
 
@@ -28,26 +28,6 @@
         } catch(Exception e) {
             throw new Exception(e.Message);
         }
-    }
-
-    private async Task DrawTriangles(float[] vertices, byte[] colors) {
-        var positionBuffer = await gl.CreateBufferAsync();
-        await gl.BindBufferAsync(BufferType.ARRAY_BUFFER, positionBuffer);
-        await gl.BufferDataAsync(BufferType.ARRAY_BUFFER, vertices, BufferUsageHint.STATIC_DRAW);
-
-        var positionLoc = (uint)await gl.GetAttribLocationAsync(glProgram.Program, "position");
-        await gl.EnableVertexAttribArrayAsync(positionLoc);
-        await gl.VertexAttribPointerAsync(positionLoc, 2, DataType.FLOAT, false, 0, 0);
-
-        var colorBuffer = await gl.CreateBufferAsync();
-        await gl.BindBufferAsync(BufferType.ARRAY_BUFFER, colorBuffer);
-        await gl.BufferDataAsync(BufferType.ARRAY_BUFFER, colors, BufferUsageHint.STATIC_DRAW);
-
-        var colorLoc = (uint)await gl.GetAttribLocationAsync(glProgram.Program, "color");
-        await gl.EnableVertexAttribArrayAsync(colorLoc);
-        await gl.VertexAttribPointerAsync(colorLoc, 4, DataType.UNSIGNED_BYTE, true, 0, 0);
-
-        await gl.DrawArraysAsync(Primitive.TRIANGLES, 0, vertices.Length);
     }
 
     private Tuple<float[], byte[]> GenerateTriangles(int count) {
@@ -68,15 +48,14 @@
 
     protected async Task Draw() {
         await gl.ViewportAsync(0, 0, (int)canvasReference.Width, (int)canvasReference.Height);
-        await gl.ClearColorAsync(0.0f, 0.0f, 0.0f, 1.0f);
 
-        await gl.ClearAsync(BufferBits.COLOR_BUFFER_BIT);
+        await glDrawer.ClearWithColor(0f, 0f, 0f, 1f);
 
         var count = (int)trianglesCount.Value;
 
         var data = GenerateTriangles(count);
 
-        await DrawTriangles(data.Item1, data.Item2);
+        await glDrawer.DrawTriangles(data.Item1, data.Item2);
         Console.WriteLine("Done drawing");
     }
 
@@ -87,7 +66,8 @@
             var vertShaderSource = await GetFileContents("Shaders/shader.vert");
             var fragShaderSource = await GetFileContents("Shaders/shader.frag");
 
-            glProgram = await GLProgram.SetUpProgram(vertShaderSource, fragShaderSource);
+            var glProgram = await GLProgram.SetUpProgram(vertShaderSource, fragShaderSource);
+            glDrawer = new GLDrawer(glProgram);
             await gl.UseProgramAsync(glProgram);
 
             await Draw();

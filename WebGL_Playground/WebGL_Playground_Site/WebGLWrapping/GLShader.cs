@@ -10,7 +10,7 @@ namespace WebGL_Playground_Site.WebGLWrapping {
 		public WebGLContext GL { get; set; }
 
 		public static async Task<GLShader> CreateShader(ShaderType type) {
-			return new GLShader(GLContext.GL, await GLContext.GL.CreateShaderAsync(type));
+			return new GLShader(await GLContext.GL.CreateShaderAsync(type));
 		}
 		public static async Task<GLShader> CreateShader(ShaderType type, string source) {
 			var Shader = await CreateShader(type);
@@ -18,8 +18,8 @@ namespace WebGL_Playground_Site.WebGLWrapping {
 			return Shader;
 		}
 
-		private GLShader(WebGLContext gl, WebGLShader shader) {
-			GL = gl;
+		private GLShader(WebGLShader shader) {
+			GL = GLContext.GL;
 			Shader = shader;
 		}
 

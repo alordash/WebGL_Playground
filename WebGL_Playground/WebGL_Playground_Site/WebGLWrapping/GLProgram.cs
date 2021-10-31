@@ -10,7 +10,7 @@ namespace WebGL_Playground_Site.WebGLWrapping {
 		public WebGLContext GL { get; set; }
 
 		public static async Task<GLProgram> CreateProgram() {
-			return new GLProgram(GLContext.GL, await GLContext.GL.CreateProgramAsync());
+			return new GLProgram(await GLContext.GL.CreateProgramAsync());
 		}
 		public static async Task<GLProgram> CreateProgram(GLShader glVertShader, GLShader glFragShader) {
 			var Program = await CreateProgram();
@@ -19,8 +19,8 @@ namespace WebGL_Playground_Site.WebGLWrapping {
 			return Program;
 		}
 
-		private GLProgram(WebGLContext gl, WebGLProgram program) {
-			GL = gl;
+		private GLProgram(WebGLProgram program) {
+			GL = GLContext.GL;
 			Program = program;
 		}
 
