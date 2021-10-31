@@ -30,22 +30,6 @@
         }
     }
 
-    private Tuple<float[], byte[]> GenerateTriangles(int count) {
-        var vertices = new float[6 * count];
-        var colors = new byte[12 * count];
-
-        var rnd = new Random();
-
-        for(int i = 0; i < vertices.Length; i++) {
-            vertices[i] = (float)(rnd.NextDouble() * 2.0 - 1.0);
-        }
-        for(int i = 0; i < colors.Length; i++) {
-            colors[i] = (byte)rnd.Next(0, 255);
-        }
-
-        return new Tuple<float[], byte[]>(vertices, colors);
-    }
-
     protected async Task Draw() {
         await gl.ViewportAsync(0, 0, (int)canvasReference.Width, (int)canvasReference.Height);
 
@@ -53,9 +37,9 @@
 
         var count = (int)trianglesCount.Value;
 
-        var data = GenerateTriangles(count);
+        var triangles = GLHelper.GenerateTriangles(count, ColorsGeneratorFlags.FixAlpha);
 
-        await glDrawer.DrawTriangles(data.Item1, data.Item2);
+        await glDrawer.DrawTriangles(triangles.vertices.ToArray(), triangles.colors.ToArray());
         Console.WriteLine("Done drawing");
     }
 
