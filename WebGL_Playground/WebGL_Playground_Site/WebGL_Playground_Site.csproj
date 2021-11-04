@@ -39,4 +39,9 @@
     <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Remove="wwwroot\Data\img2.jpg" />
+    <Content Remove="Pages\ImageConvolution.razor" />
+  </ItemGroup>
+
 </Project>

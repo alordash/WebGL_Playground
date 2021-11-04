@@ -16,7 +16,7 @@
     private bool showMinus = false;
 
     private string FormatOutput(double d) {
-        return d.ToString() + (showTrailingZeroes ? "." : "");
+        return d.ToString(CultureInfo.InvariantCulture) + (showTrailingZeroes ? "." : "");
     }
 
     private string InputString {

@@ -1,15 +1,20 @@
 ﻿@page "/trianglesInterpolation"
+@using System.Threading;
 @using Blazor.Extensions.Canvas.WebGL;
 @using WebGLWrapping;
 @inject HttpClient Http;
 
 <h3>Triangles interpolation</h3>
 
-<BECanvas Width="1000" Height="600" @ref="canvasReference"></BECanvas>
-<br />
-<NumberInput IntegerNumber="true" @ref="trianglesCount" DefaultValue="10" />
-<br />
-<button @onclick="Draw">Draw</button>
+<BECanvas Width="850" Height="850" @ref="canvasReference"></BECanvas>
+<br/>
+<NumberInput IntegerNumber="true" @ref="trianglesCount" DefaultValue="10"/>
+<br/>
+<button @onclick="Draw">Random</button>
+<br/>
+<NumberInput @ref="timeStepInput" DefaultValue="0.005"/>
+<br/>
+<button @onclick="Interpolate">Interpolate</button>
 
 @code {
     private BECanvasComponent canvasReference;
@@ -17,6 +22,8 @@
     private GLDrawer glDrawer;
 
     private NumberInput trianglesCount;
+    private NumberInput timeStepInput;
+    private float Time = 0.0f;
 
     private bool needsRendering = true;
 
@@ -25,9 +32,59 @@
         try {
             source = await Http.GetStringAsync(sourcePath);
             return source;
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new Exception(e.Message);
         }
+    }
+
+    public async Task<uint> FillBuffer<T>(string locationName, int size, DataType dataType, bool normalize, T[] data) {
+        var buffer = await gl.CreateBufferAsync();
+        await gl.BindBufferAsync(BufferType.ARRAY_BUFFER, buffer);
+        await gl.BufferDataAsync(BufferType.ARRAY_BUFFER, data, BufferUsageHint.STATIC_DRAW);
+
+        var variableLocation = (uint)await gl.GetAttribLocationAsync(glDrawer.Program.Program, locationName);
+        await gl.EnableVertexAttribArrayAsync(variableLocation);
+        await gl.VertexAttribPointerAsync(variableLocation, size, dataType, normalize, 0, 0);
+        return variableLocation;
+    }
+
+    public async Task SetTime(float time) {
+        var timeLoc = await gl.GetUniformLocationAsync(glDrawer.Program.Program, "u_time");
+        await gl.UniformAsync(timeLoc, time);
+    }
+
+    public async Task InterpolateTriangles(float[] beginVertices, byte[] beginColors, float[] endVertices, byte[] endColors, float time) {
+        if (beginVertices.Length != endVertices.Length || beginColors.Length != endColors.Length) {
+            throw new Exception("Begin and end values have different lenght");
+        }
+
+        var program = glDrawer.Program.Program;
+
+        var beginPositionLoc = await FillBuffer("a_begin_position", 2, DataType.FLOAT, false, beginVertices);
+        var beginColorsLoc = await FillBuffer("a_begin_color", 4, DataType.UNSIGNED_BYTE, true, beginColors);
+        var endPositionLoc = await FillBuffer("a_end_position", 2, DataType.FLOAT, false, endVertices);
+        var endColorsLoc = await FillBuffer("a_end_color", 4, DataType.UNSIGNED_BYTE, true, endColors);
+
+        await SetTime(time);
+
+        await gl.DrawArraysAsync(Primitive.TRIANGLES, 0, beginVertices.Length);
+    }
+
+    private TrianglesSet beginTriangles;
+    private TrianglesSet endTriangles;
+    private int VerticesCount;
+
+    private void SetUpTriangles() {
+        var count = (int)trianglesCount.Value;
+        beginTriangles = GLHelper.GenerateTriangles(count, ColorsGeneratorFlags.FixAlpha);
+        var beginVertices = beginTriangles.vertices.ToArray();
+        VerticesCount = beginVertices.Length;
+        beginTriangles.vertices = beginVertices;
+        beginTriangles.colors = beginTriangles.colors.ToArray();
+            
+        endTriangles = GLHelper.GenerateTriangles(count, ColorsGeneratorFlags.FixAlpha);
+        endTriangles.vertices = endTriangles.vertices.ToArray();
+        endTriangles.colors = endTriangles.colors.ToArray();
     }
 
     protected async Task Draw() {
@@ -35,20 +92,61 @@
 
         await glDrawer.ClearWithColor(0f, 0f, 0f, 1f);
 
-        var count = (int)trianglesCount.Value;
+        SetUpTriangles();
 
-        var triangles = GLHelper.GenerateTriangles(count);
-
-        await glDrawer.DrawTriangles(triangles.vertices.ToArray(), triangles.colors.ToArray());
+        await InterpolateTriangles(beginTriangles.vertices.ToArray(),
+                                   beginTriangles.colors.ToArray(),
+                                   endTriangles.vertices.ToArray(),
+                                   endTriangles.colors.ToArray(),
+                                   (float)Time);
         Console.WriteLine("Done drawing");
     }
 
+    private Task InterpolateTask;
+    private bool ContinueInterpolation = true;
+    private float timeStep = 0.005f;
+
+    protected async Task Interpolate() {
+        timeStep = (float)timeStepInput.Value;
+        if (InterpolateTask is not null) {
+            ContinueInterpolation = !ContinueInterpolation;
+            return;
+        }
+        InterpolateTask = Task.Run(async () => {
+            var interval = (int)(1000 * timeStep);
+            while(true) {
+                await Task.Delay(interval);
+                if (!ContinueInterpolation) {
+                    continue;
+                }
+                await glDrawer.ClearWithColor(0f, 0f, 0f, 1f);
+                var newTime = Time + timeStep;
+                switch (newTime) {
+                    case > 1f:
+                        timeStep = -timeStep;
+                        newTime = Time + timeStep;
+                        break;
+                    case < 0f:
+                        timeStep = -timeStep;
+                        newTime = Time + timeStep;
+                        break;
+                }
+                Time = (float)newTime;
+                await SetTime((float)Time);
+
+                await gl.DrawArraysAsync(Primitive.TRIANGLES, 0, VerticesCount);
+            }
+        });
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender) {
-        if(needsRendering) {
+        if (needsRendering) {
             gl = GLContext.GL = await canvasReference.CreateWebGLAsync(new WebGLContextAttributes { PowerPreference = WebGLContextAttributes.POWER_PREFERENCE_HIGH_PERFORMANCE });
 
-            var vertShaderSource = await GetFileContents("Shaders/shader.vert");
-            var fragShaderSource = await GetFileContents("Shaders/shader.frag");
+            var vertShaderSource = await GetFileContents("Shaders/interpolation.vert");
+            var fragShaderSource = await GetFileContents("Shaders/interpolation.frag");
+
+            SetUpTriangles();
 
             var glProgram = await GLProgram.SetUpProgram(vertShaderSource, fragShaderSource);
             glDrawer = new GLDrawer(glProgram);
@@ -59,4 +157,5 @@
             needsRendering = false;
         }
     }
+
 }
