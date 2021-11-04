@@ -82,7 +82,7 @@
         beginTriangles.vertices = beginVertices;
         beginTriangles.colors = beginTriangles.colors.ToArray();
             
-        endTriangles = GLHelper.GenerateTriangles(count, ColorsGeneratorFlags.FixAlpha);
+        endTriangles = GLHelper.GenerateTriangles(count);
         endTriangles.vertices = endTriangles.vertices.ToArray();
         endTriangles.colors = endTriangles.colors.ToArray();
     }
