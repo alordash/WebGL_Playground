@@ -80,6 +80,7 @@ namespace WebGL_Playground_Site.WebGLWrapping {
         }
 
         public async Task DrawVoronoiTesselation(float[] vertices, float[] colors) {
+            await FillUniformI("u_count", vertices.Length / 2); 
             for (var i = 0; i < vertices.Length; i += 2) {
                 var values = vertices.Subsequence(i, 2).ToArray();
                 await FillUniformF($"u_positions[{i.ToString()}]", values);

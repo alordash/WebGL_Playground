@@ -33,7 +33,7 @@
         var vertices = Points.SelectMany(x => new[] {
             x.x, x.y
         }).ToArray();
-        var colors = GLHelper.NormalizeColors(GLHelper.GenerateColorSets(vertices.Length / 2)).ToArray();
+        var colors = GLHelper.NormalizeColors(GLHelper.GenerateColorSets(vertices.Length / 2, ColorsGeneratorFlags.FixAlpha)).ToArray();
         await glDrawer.DrawVoronoiTesselation(vertices, colors);
     }
 
