@@ -1,4 +1,4 @@
-﻿@page "/VoronoiTesselation"
+﻿@page "/voronoiTesselation"
 
 @using Blazor.Extensions.Canvas.WebGL;
 @using WebGLWrapping;
@@ -9,7 +9,9 @@
 
 <h3>Voronoi Tesselation</h3>
 
-<BECanvas Width="1700" Height="850" @ref="canvasReference"></BECanvas>
+<BECanvas Width="1000" Height="600" @ref="canvasReference"></BECanvas>
+<br/>
+<button @onclick="Draw">Draw</button>
 
 @code {
     private BECanvasComponent canvasReference;
@@ -18,16 +20,25 @@
 
     private IEnumerable<Point> Points;
 
+    private async Task Draw() {
+        await glDrawer.ClearWithColor(0.5f, 0.5f, 0.5f, 1f);
+        
+        var verticesValues = GLHelper.FillTrianglesVertices;
+        var colors = GLHelper.GenerateColorSets(6, ColorsGeneratorFlags.FixAlpha);
+        await glDrawer.DrawTriangles(verticesValues, colors.ToArray());
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender) {
         if (firstRender) {
             gl = GLContext.GL = await canvasReference.CreateWebGLAsync(new WebGLContextAttributes { PowerPreference = WebGLContextAttributes.POWER_PREFERENCE_HIGH_PERFORMANCE });
 
-            var vertShaderSource = await Misc.GetFileContents("Shaders/interpolation.vert", Http);
-            var fragShaderSource = await Misc.GetFileContents("Shaders/interpolation.frag", Http);
+            var vertShaderSource = await Misc.GetFileContents("Shaders/shader.vert", Http);
+            var fragShaderSource = await Misc.GetFileContents("Shaders/shader.frag", Http);
 
             var glProgram = await GLProgram.SetUpProgram(vertShaderSource, fragShaderSource);
             glDrawer = new GLDrawer(glProgram);
             await gl.UseProgramAsync(glProgram);
+            await glDrawer.ClearWithColor(0.5f, 0.5f, 0.5f, 1f);
         }
     }
 
