@@ -6,6 +6,7 @@
 @using WebGL_Playground_Site;
 @using WebGL_Playground_Site.Geometry
 @inject HttpClient Http;
+@inject IJSRuntime JS
 
 <h3>Voronoi Tesselation</h3>
 
@@ -25,16 +26,44 @@
     private IEnumerable<Point> Points = Point.GeneratePoints(DefaultPointsCount);
 
     private async Task Draw() {
-        await glDrawer.ClearWithColor(0.5f, 0.5f, 0.5f, 1f);
 
-        await glDrawer.DrawBlankRectangle();
+        await glDrawer.ClearWithColor(0.5f, 0.5f, 0.5f, 1f);
 
         Points = Point.GeneratePoints((int)pointsCountInput.Value);
         var vertices = Points.SelectMany(x => new[] {
             x.x, x.y
         }).ToArray();
         var colors = GLHelper.NormalizeColors(GLHelper.GenerateColorSets(vertices.Length / 2, ColorsGeneratorFlags.FixAlpha)).ToArray();
-        await glDrawer.DrawVoronoiTesselation(vertices, colors);
+
+        await glDrawer.FillBuffer("a_texCoord", 2, DataType.FLOAT, false, new float[] {
+            0f, 0f,
+            1f, 0f,
+            0f, 1f,
+            0f, 1f,
+            1f, 0f,
+            1f, 1f,
+        });
+        var texture = await gl.CreateTextureAsync();
+        await gl.BindTextureAsync(TextureType.TEXTURE_2D, texture);
+
+        await gl.TexParameterAsync(TextureType.TEXTURE_2D, TextureParameter.TEXTURE_WRAP_S, (uint)TextureParameterValue.CLAMP_TO_EDGE);
+        await gl.TexParameterAsync(TextureType.TEXTURE_2D, TextureParameter.TEXTURE_WRAP_T, (uint)TextureParameterValue.CLAMP_TO_EDGE);
+        await gl.TexParameterAsync(TextureType.TEXTURE_2D, TextureParameter.TEXTURE_MIN_FILTER, (uint)TextureParameterValue.NEAREST);
+        await gl.TexParameterAsync(TextureType.TEXTURE_2D, TextureParameter.TEXTURE_MAG_FILTER, (uint)TextureParameterValue.NEAREST);
+
+        var values = new uint[] {
+            100, 100, 100, 255,
+            200, 200, 100, 255,
+            0, 0, 255, 255,
+            255, 255, 0, 255,
+        };
+        
+        var pixels = await JS.InvokeAsync<string>("glTexImage2D", canvasReference, Texture2DType.TEXTURE_2D, 0, PixelFormat.RGBA, 2, 2, 0, PixelFormat.RGBA, PixelType.UNSIGNED_BYTE, values);
+    //        await gl.TexImage2DAsync(Texture2DType.TEXTURE_2D, 0, PixelFormat.RGBA, 2, 2, PixelFormat.RGBA, PixelType.UNSIGNED_BYTE, values);
+        Console.WriteLine(pixels);
+
+        await glDrawer.DrawBlankRectangle();
+    //        await glDrawer.DrawVoronoiTesselation(vertices, colors);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender) {

@@ -1,4 +1,7 @@
 ﻿attribute vec4 a_position;
+attribute vec2 a_texCoord;
+
+varying vec2 v_texCoord;
 
 const int max_iters = 200;
 
@@ -9,6 +12,9 @@ uniform vec4 u_colors[max_iters];
 varying vec4 v_color;
 
 void main() {
+    v_texCoord = a_texCoord;
+    gl_Position = a_position;
+    /*
     int index = 0;
     float minDst = 100.;
     for(int i = 0; i < max_iters; i++) {
@@ -24,5 +30,5 @@ void main() {
     }
 
     gl_Position = a_position;
-    v_color = u_colors[index];
+    v_color = u_colors[index];*/
 }
