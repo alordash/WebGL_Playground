@@ -1,4 +1,5 @@
 ﻿@page "/"
+
 @using Blazor.Extensions.Canvas.WebGL;
 @using WebGLWrapping;
 @inject HttpClient Http;
@@ -17,8 +18,6 @@
     private GLDrawer glDrawer;
 
     private NumberInput trianglesCount;
-
-    private bool needsRendering = true;
 
     private async Task<String> GetFileContents(string sourcePath) {
         string source;
@@ -44,7 +43,7 @@
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender) {
-        if(needsRendering) {
+        if(firstRender) {
             gl = GLContext.GL = await canvasReference.CreateWebGLAsync(new WebGLContextAttributes { PowerPreference = WebGLContextAttributes.POWER_PREFERENCE_HIGH_PERFORMANCE });
 
             var vertShaderSource = await GetFileContents("Shaders/shader.vert");
@@ -55,8 +54,6 @@
             await gl.UseProgramAsync(glProgram);
 
             await Draw();
-
-            needsRendering = false;
         }
     }
 }

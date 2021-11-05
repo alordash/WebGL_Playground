@@ -1,4 +1,5 @@
 ﻿@page "/trianglesInterpolation"
+
 @using System.Threading;
 @using Blazor.Extensions.Canvas.WebGL;
 @using WebGLWrapping;
@@ -24,8 +25,6 @@
     private NumberInput trianglesCount;
     private NumberInput timeStepInput;
     private float Time = 0.0f;
-
-    private bool needsRendering = true;
 
     private async Task<String> GetFileContents(string sourcePath) {
         string source;
@@ -140,7 +139,7 @@
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender) {
-        if (needsRendering) {
+        if (firstRender) {
             gl = GLContext.GL = await canvasReference.CreateWebGLAsync(new WebGLContextAttributes { PowerPreference = WebGLContextAttributes.POWER_PREFERENCE_HIGH_PERFORMANCE });
 
             var vertShaderSource = await GetFileContents("Shaders/interpolation.vert");
@@ -153,8 +152,6 @@
             await gl.UseProgramAsync(glProgram);
 
             await Draw();
-
-            needsRendering = false;
         }
     }
 
