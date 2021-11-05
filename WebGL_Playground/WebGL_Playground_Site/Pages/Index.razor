@@ -2,6 +2,7 @@
 
 @using Blazor.Extensions.Canvas.WebGL;
 @using WebGLWrapping;
+@using WebGL_Playground_Site;
 @inject HttpClient Http;
 
 <h1>Random triangles</h1>
@@ -18,16 +19,6 @@
     private GLDrawer glDrawer;
 
     private NumberInput trianglesCount;
-
-    private async Task<String> GetFileContents(string sourcePath) {
-        string source;
-        try {
-            source = await Http.GetStringAsync(sourcePath);
-            return source;
-        } catch(Exception e) {
-            throw new Exception(e.Message);
-        }
-    }
 
     protected async Task Draw() {
         await gl.ViewportAsync(0, 0, (int)canvasReference.Width, (int)canvasReference.Height);
@@ -46,8 +37,8 @@
         if(firstRender) {
             gl = GLContext.GL = await canvasReference.CreateWebGLAsync(new WebGLContextAttributes { PowerPreference = WebGLContextAttributes.POWER_PREFERENCE_HIGH_PERFORMANCE });
 
-            var vertShaderSource = await GetFileContents("Shaders/shader.vert");
-            var fragShaderSource = await GetFileContents("Shaders/shader.frag");
+            var vertShaderSource = await Misc.GetFileContents("Shaders/shader.vert", Http);
+            var fragShaderSource = await Misc.GetFileContents("Shaders/shader.frag", Http);
 
             var glProgram = await GLProgram.SetUpProgram(vertShaderSource, fragShaderSource);
             glDrawer = new GLDrawer(glProgram);

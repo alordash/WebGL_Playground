@@ -1,0 +1,34 @@
+﻿@page "/VoronoiTesselation"
+
+@using Blazor.Extensions.Canvas.WebGL;
+@using WebGLWrapping;
+@using System.Collections
+@using WebGL_Playground_Site;
+@using WebGL_Playground_Site.Geometry
+@inject HttpClient Http;
+
+<h3>Voronoi Tesselation</h3>
+
+<BECanvas Width="1700" Height="850" @ref="canvasReference"></BECanvas>
+
+@code {
+    private BECanvasComponent canvasReference;
+    private WebGLContext gl;
+    private GLDrawer glDrawer;
+
+    private IEnumerable<Point> Points;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender) {
+        if (firstRender) {
+            gl = GLContext.GL = await canvasReference.CreateWebGLAsync(new WebGLContextAttributes { PowerPreference = WebGLContextAttributes.POWER_PREFERENCE_HIGH_PERFORMANCE });
+
+            var vertShaderSource = await Misc.GetFileContents("Shaders/interpolation.vert", Http);
+            var fragShaderSource = await Misc.GetFileContents("Shaders/interpolation.frag", Http);
+
+            var glProgram = await GLProgram.SetUpProgram(vertShaderSource, fragShaderSource);
+            glDrawer = new GLDrawer(glProgram);
+            await gl.UseProgramAsync(glProgram);
+        }
+    }
+
+}

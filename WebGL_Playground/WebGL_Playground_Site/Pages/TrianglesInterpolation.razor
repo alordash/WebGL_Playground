@@ -3,6 +3,7 @@
 @using System.Threading;
 @using Blazor.Extensions.Canvas.WebGL;
 @using WebGLWrapping;
+@using WebGL_Playground_Site;
 @inject HttpClient Http;
 
 <h3>Triangles interpolation</h3>
@@ -25,16 +26,6 @@
     private NumberInput trianglesCount;
     private NumberInput timeStepInput;
     private float Time = 0.0f;
-
-    private async Task<String> GetFileContents(string sourcePath) {
-        string source;
-        try {
-            source = await Http.GetStringAsync(sourcePath);
-            return source;
-        } catch (Exception e) {
-            throw new Exception(e.Message);
-        }
-    }
 
     public async Task<uint> FillBuffer<T>(string locationName, int size, DataType dataType, bool normalize, T[] data) {
         var buffer = await gl.CreateBufferAsync();
@@ -142,8 +133,8 @@
         if (firstRender) {
             gl = GLContext.GL = await canvasReference.CreateWebGLAsync(new WebGLContextAttributes { PowerPreference = WebGLContextAttributes.POWER_PREFERENCE_HIGH_PERFORMANCE });
 
-            var vertShaderSource = await GetFileContents("Shaders/interpolation.vert");
-            var fragShaderSource = await GetFileContents("Shaders/interpolation.frag");
+            var vertShaderSource = await Misc.GetFileContents("Shaders/interpolation.vert", Http);
+            var fragShaderSource = await Misc.GetFileContents("Shaders/interpolation.frag", Http);
 
             SetUpTriangles();
 

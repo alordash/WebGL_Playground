@@ -44,4 +44,8 @@
     <Content Remove="Pages\ImageConvolution.razor" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="WebGL_Playground_Site.csproj.DotSettings" />
+  </ItemGroup>
+
 </Project>
