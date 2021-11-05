@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using WebGL_Playground_Site.WebGLWrapping;
 
 namespace WebGL_Playground_Site.Geometry {
     public class Point {
@@ -13,11 +14,11 @@ namespace WebGL_Playground_Site.Geometry {
         }
 
         public static IEnumerable<Point> FloatsToPoints(IEnumerable<float> values) {
-            if ((values.Count() & 1) == 1) {
-                return Enumerable.Empty<Point>();
-            }
-
             return values.Zip(values.Skip(1)).Select(x => new Point(x.First, x.Second));
+        }
+
+        public static IEnumerable<Point> GeneratePoints(int count) {
+            return Point.FloatsToPoints(GLHelper.GenerateFloats(count));
         }
     }
 }

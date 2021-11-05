@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -37,6 +38,10 @@ namespace WebGL_Playground_Site.WebGLWrapping {
                         (byte)(colorOptions.HasFlag(ColorsGeneratorFlags.FixAlpha) ? 255 : random.Next(0, 255))
                     });
             return v;
+        }
+
+        public static IEnumerable<float> NormalizeColors(IEnumerable<byte> colors) {
+            return colors.Select(x => (float)x / 255);
         }
 
         public static TrianglesSet GenerateTriangles(int count, ColorsGeneratorFlags colorOptions = ColorsGeneratorFlags.Default) {

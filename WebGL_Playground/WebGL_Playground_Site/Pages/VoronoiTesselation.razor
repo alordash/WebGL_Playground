@@ -11,6 +11,8 @@
 
 <BECanvas Width="1000" Height="600" @ref="canvasReference"></BECanvas>
 <br/>
+<NumberInput @ref="pointsCountInput" IntegerNumber="true" DefaultValue="5" PlaceHolder="Number of points"/>
+<br/>
 <button @onclick="Draw">Draw</button>
 
 @code {
@@ -18,22 +20,31 @@
     private WebGLContext gl;
     private GLDrawer glDrawer;
 
-    private IEnumerable<Point> Points;
+    private NumberInput pointsCountInput;
+        private const int DefaultPointsCount = 5;
+    private IEnumerable<Point> Points = Point.GeneratePoints(DefaultPointsCount);
 
     private async Task Draw() {
         await glDrawer.ClearWithColor(0.5f, 0.5f, 0.5f, 1f);
-        
-        var verticesValues = GLHelper.FillTrianglesVertices;
-        var colors = GLHelper.GenerateColorSets(6, ColorsGeneratorFlags.FixAlpha);
-        await glDrawer.DrawTriangles(verticesValues, colors.ToArray());
+
+        await glDrawer.DrawBlankRectangle();
+
+        Points = Point.GeneratePoints((int)pointsCountInput.Value);
+        var vertices = Points.SelectMany(x => new[] {
+            x.x, x.y
+        }).ToArray();
+        var colors = GLHelper.NormalizeColors(GLHelper.GenerateColorSets(vertices.Length / 2)).ToArray();
+        await glDrawer.DrawVoronoiTesselation(vertices, colors);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender) {
         if (firstRender) {
-            gl = GLContext.GL = await canvasReference.CreateWebGLAsync(new WebGLContextAttributes { PowerPreference = WebGLContextAttributes.POWER_PREFERENCE_HIGH_PERFORMANCE });
+            gl = GLContext.GL = await canvasReference.CreateWebGLAsync(new WebGLContextAttributes {
+                PowerPreference = WebGLContextAttributes.POWER_PREFERENCE_HIGH_PERFORMANCE
+            });
 
-            var vertShaderSource = await Misc.GetFileContents("Shaders/shader.vert", Http);
-            var fragShaderSource = await Misc.GetFileContents("Shaders/shader.frag", Http);
+            var vertShaderSource = await Misc.GetFileContents("Shaders/voronoi.vert", Http);
+            var fragShaderSource = await Misc.GetFileContents("Shaders/voronoi.frag", Http);
 
             var glProgram = await GLProgram.SetUpProgram(vertShaderSource, fragShaderSource);
             glDrawer = new GLDrawer(glProgram);
