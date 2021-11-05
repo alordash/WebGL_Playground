@@ -27,39 +27,6 @@
     private NumberInput timeStepInput;
     private float Time = 0.0f;
 
-    public async Task<uint> FillBuffer<T>(string locationName, int size, DataType dataType, bool normalize, T[] data) {
-        var buffer = await gl.CreateBufferAsync();
-        await gl.BindBufferAsync(BufferType.ARRAY_BUFFER, buffer);
-        await gl.BufferDataAsync(BufferType.ARRAY_BUFFER, data, BufferUsageHint.STATIC_DRAW);
-
-        var variableLocation = (uint)await gl.GetAttribLocationAsync(glDrawer.Program.Program, locationName);
-        await gl.EnableVertexAttribArrayAsync(variableLocation);
-        await gl.VertexAttribPointerAsync(variableLocation, size, dataType, normalize, 0, 0);
-        return variableLocation;
-    }
-
-    public async Task SetTime(float time) {
-        var timeLoc = await gl.GetUniformLocationAsync(glDrawer.Program.Program, "u_time");
-        await gl.UniformAsync(timeLoc, time);
-    }
-
-    public async Task InterpolateTriangles(float[] beginVertices, byte[] beginColors, float[] endVertices, byte[] endColors, float time) {
-        if (beginVertices.Length != endVertices.Length || beginColors.Length != endColors.Length) {
-            throw new Exception("Begin and end values have different lenght");
-        }
-
-        var program = glDrawer.Program.Program;
-
-        var beginPositionLoc = await FillBuffer("a_begin_position", 2, DataType.FLOAT, false, beginVertices);
-        var beginColorsLoc = await FillBuffer("a_begin_color", 4, DataType.UNSIGNED_BYTE, true, beginColors);
-        var endPositionLoc = await FillBuffer("a_end_position", 2, DataType.FLOAT, false, endVertices);
-        var endColorsLoc = await FillBuffer("a_end_color", 4, DataType.UNSIGNED_BYTE, true, endColors);
-
-        await SetTime(time);
-
-        await gl.DrawArraysAsync(Primitive.TRIANGLES, 0, beginVertices.Length);
-    }
-
     private TrianglesSet beginTriangles;
     private TrianglesSet endTriangles;
     private int VerticesCount;
@@ -84,7 +51,7 @@
 
         SetUpTriangles();
 
-        await InterpolateTriangles(beginTriangles.vertices.ToArray(),
+        await glDrawer.InterpolateTriangles(beginTriangles.vertices.ToArray(),
                                    beginTriangles.colors.ToArray(),
                                    endTriangles.vertices.ToArray(),
                                    endTriangles.colors.ToArray(),
@@ -122,7 +89,7 @@
                         break;
                 }
                 Time = (float)newTime;
-                await SetTime((float)Time);
+                await glDrawer.SetTime((float)Time);
 
                 await gl.DrawArraysAsync(Primitive.TRIANGLES, 0, VerticesCount);
             }
