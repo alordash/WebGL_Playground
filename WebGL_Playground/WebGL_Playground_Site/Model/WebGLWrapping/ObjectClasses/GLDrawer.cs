@@ -4,7 +4,9 @@ using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using Blazor.Extensions;
 using Blazor.Extensions.Canvas.WebGL;
+using Microsoft.JSInterop;
 using DataType = Blazor.Extensions.Canvas.WebGL.DataType;
 
 namespace WebGL_Playground_Site.WebGLWrapping {
@@ -92,6 +94,27 @@ namespace WebGL_Playground_Site.WebGLWrapping {
                 var values = colors.Subsequence(i, 4).ToArray();
                 await FillUniformF($"u_colors[{i.ToString()}]", values);
             }
+        }
+
+        // VIP
+        public async Task DrawTexture(IJSRuntime JS, BECanvasComponent canvasReference) {
+            await FillBuffer("a_texCoord", 2, DataType.FLOAT, false, GLHelper.FillTexturesVertices);
+            var texture = await GL.CreateTextureAsync();
+            await GL.BindTextureAsync(TextureType.TEXTURE_2D, texture);
+
+            await GL.TexParameterAsync(TextureType.TEXTURE_2D, TextureParameter.TEXTURE_WRAP_S, (uint)TextureParameterValue.CLAMP_TO_EDGE);
+            await GL.TexParameterAsync(TextureType.TEXTURE_2D, TextureParameter.TEXTURE_WRAP_T, (uint)TextureParameterValue.CLAMP_TO_EDGE);
+            await GL.TexParameterAsync(TextureType.TEXTURE_2D, TextureParameter.TEXTURE_MIN_FILTER, (uint)TextureParameterValue.NEAREST);
+            await GL.TexParameterAsync(TextureType.TEXTURE_2D, TextureParameter.TEXTURE_MAG_FILTER, (uint)TextureParameterValue.NEAREST);
+
+            var values = new byte[] {
+                255, 0, 0, 255,
+                0, 255, 0, 255,
+                0, 0, 255, 255,
+                255, 255, 0, 255,
+            };
+
+            await GL.TexImage2DAsync(JS, canvasReference, Texture2DType.TEXTURE_2D, 0, PixelFormat.RGBA, 2, 2, 0, PixelFormat.RGBA, PixelType.UNSIGNED_BYTE, values);
         }
     }
 }
