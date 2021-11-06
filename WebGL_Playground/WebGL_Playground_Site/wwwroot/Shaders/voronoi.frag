@@ -4,33 +4,23 @@ const int max_iters = 200;
 
 uniform bool u_highlight;
 
+uniform float u_time;
+
 uniform int u_count;
-uniform vec2 u_positions[max_iters];
+uniform vec2 u_begin_positions[max_iters];
+uniform vec2 u_end_positions[max_iters];
 uniform vec4 u_colors[max_iters];
 
-varying vec4 v_position;
+varying vec2 v_position;
 
 const float threshold = 0.01;
 
 vec4 HighlightColor(vec4 color) {
-//    float max = color.r;
-//    if(color.g > max) {
-//        max = color.y;
-//    }
-//    if(color.b > max) {
-//        max = color.b;
-//    }
-//    if(color.r >= max) {
-//        color.r = 0.;
-//    }
-//    if(color.g >= max) {
-//        color.g = 0.;
-//    }
-//    if(color.b >= max) {
-//        color.b = 0.;
-//    }
-//    return color;
     return vec4(1. - color.r, 1. - color.g, 1. - color.b, color.a);
+}
+
+vec2 Interpolate(vec2 begin, vec2 end, float t) {
+    return begin + (end - begin) * t;
 }
 
 void main() {
@@ -41,8 +31,8 @@ void main() {
         if(i >= u_count) {
             break;
         }
-        vec2 p = u_positions[i];
-        float dst = distance(v_position.xy, p);
+        vec2 p = Interpolate(u_begin_positions[i], u_end_positions[i], u_time);
+        float dst = distance(v_position, p);
         if(u_highlight && dst < threshold) {
             highlight = true;
         }

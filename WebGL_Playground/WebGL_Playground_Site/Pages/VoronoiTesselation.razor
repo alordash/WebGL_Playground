@@ -16,6 +16,9 @@
 <input type="checkbox" @bind="DrawPoints">Draw points
 <br/>
 <button @onclick="DrawButtonClick">Draw</button>
+<br/>
+<NumberInput @ref="TimeStepInput" DefaultValue="0.01"/>
+<button @onclick="Interpolate">Interpolate</button>
 
 @code {
     private BECanvasComponent canvasReference;
@@ -25,10 +28,8 @@
     public NumberInput PointsCountInput;
         public const int DefaultPointsCount = 20;
 
-    private IEnumerable<float> vertices;
-    private IEnumerable<float> colors;
-    private float[] verticesValues;
-    private float[] colorsValues;
+    private MeshData beginMesh = new MeshData();
+    private MeshData endMesh = new MeshData();
 
     private bool drawPoints = false;
     private bool DrawPoints {
@@ -39,29 +40,67 @@
         }
     }
 
-    private void RandomizeData() {
-        var count = (int)PointsCountInput.Value;
-        vertices = GLHelper.GenerateFloats(2 * count);
-        colors = GLHelper.NormalizeColors(GLHelper.GenerateColorSets(count, ColorsGeneratorFlags.FixAlpha));
-        verticesValues = vertices.ToArray();
-        colorsValues = colors.ToArray();
+    private void RandomizeMeshes() {
+        beginMesh.RandomizeData((int)PointsCountInput.Value);
+        endMesh.RandomizeData((int)PointsCountInput.Value);
     }
 
     private async Task Draw() {
         await glDrawer.ClearWithColor(0.5f, 0.5f, 0.5f, 1f);
-
         await glDrawer.FillUniformI("u_highlight", DrawPoints ? 1 : 0);
-        await glDrawer.DrawVoronoiTesselation(verticesValues, colorsValues);
+        await glDrawer.DrawVoronoiTesselation(beginMesh, endMesh, time);
     }
 
     private async Task DrawButtonClick() {
-        RandomizeData();
+        RandomizeMeshes();
         await Draw();
+    }
+
+    public NumberInput TimeStepInput;
+    public float time = 0f;
+    private Task InterpolateTask;
+    private bool ContinueInterpolation = true;
+    private float timeStep = 0.005f;
+
+    protected async Task Interpolate() {
+        timeStep = (float)TimeStepInput.Value;
+        if (InterpolateTask is not null) {
+            ContinueInterpolation = !ContinueInterpolation;
+            return;
+        }
+        InterpolateTask = Task.Run(async () => {
+            var interval = (int)(1000 * timeStep);
+            while (true) {
+                await Task.Delay(interval);
+                if (!ContinueInterpolation) {
+                    continue;
+                }
+                await glDrawer.ClearWithColor(0f, 0f, 0f, 1f);
+                var newTime = time + timeStep;
+                switch (newTime) {
+                    case > 1f:
+                        timeStep = -timeStep;
+                        newTime = time + timeStep;
+                        break;
+                    case < 0f:
+                        timeStep = -timeStep;
+                        newTime = time + timeStep;
+                        break;
+                }
+                time = (float)newTime;
+                Console.WriteLine($"Interpolating, time {time}");
+
+                await glDrawer.FillUniformI("u_highlight", DrawPoints ? 1 : 0);
+                await glDrawer.SetTime(time);
+                await glDrawer.DrawBlankRectangle(false);
+    //                await glDrawer.DrawVoronoiTesselation(beginMesh, beginMesh, time);
+            }
+        });
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender) {
         if (firstRender) {
-            RandomizeData();
+            RandomizeMeshes();
 
             gl = GLContext.GL = await canvasReference.CreateWebGLAsync(new WebGLContextAttributes {
                 PowerPreference = WebGLContextAttributes.POWER_PREFERENCE_HIGH_PERFORMANCE

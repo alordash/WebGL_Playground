@@ -68,4 +68,19 @@ namespace WebGL_Playground_Site.WebGLWrapping {
             1, -1,
         };
     }
+
+    public class MeshData {
+        public IEnumerable<float> VerticesSource = Enumerable.Empty<float>();
+        public IEnumerable<float> ColorsSource = Enumerable.Empty<float>();
+
+        public float[] Vertices = Array.Empty<float>();
+        public float[] Colors = Array.Empty<float>();
+
+        public void RandomizeData(int count) {
+            VerticesSource = GLHelper.GenerateFloats(2 * count);
+            ColorsSource = GLHelper.NormalizeColors(GLHelper.GenerateColorSets(count, ColorsGeneratorFlags.FixAlpha));
+            Vertices = VerticesSource.ToArray();
+            Colors = ColorsSource.ToArray();
+        }
+    }
 }

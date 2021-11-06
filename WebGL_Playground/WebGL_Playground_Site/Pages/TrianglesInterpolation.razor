@@ -10,11 +10,11 @@
 
 <BECanvas Width="1700" Height="850" @ref="canvasReference"></BECanvas>
 <br/>
-<NumberInput IntegerNumber="true" @ref="trianglesCount" DefaultValue="10"/>
+<NumberInput IntegerNumber="true" @ref="TrianglesCount" DefaultValue="10"/>
 <br/>
 <button @onclick="Draw">Random</button>
 <br/>
-<NumberInput @ref="timeStepInput" DefaultValue="0.005"/>
+<NumberInput @ref="TimeStepInput" DefaultValue="0.005"/>
 <br/>
 <button @onclick="Interpolate">Interpolate</button>
 
@@ -23,16 +23,14 @@
     private WebGLContext gl;
     private GLDrawer glDrawer;
 
-    private NumberInput trianglesCount;
-    private NumberInput timeStepInput;
-    private float Time = 0.0f;
+    public NumberInput TrianglesCount;
 
     private TrianglesSet beginTriangles;
     private TrianglesSet endTriangles;
     private int VerticesCount;
 
     private void SetUpTriangles() {
-        var count = (int)trianglesCount.Value;
+        var count = (int)TrianglesCount.Value;
         beginTriangles = GLHelper.GenerateTriangles(count, ColorsGeneratorFlags.FixAlpha);
         var beginVertices = beginTriangles.vertices.ToArray();
         VerticesCount = beginVertices.Length;
@@ -55,16 +53,18 @@
                                    beginTriangles.colors.ToArray(),
                                    endTriangles.vertices.ToArray(),
                                    endTriangles.colors.ToArray(),
-                                   (float)Time);
+                                   time);
         Console.WriteLine("Done drawing");
     }
 
+    public NumberInput TimeStepInput;
+    private float time = 0.0f;
     private Task InterpolateTask;
     private bool ContinueInterpolation = true;
     private float timeStep = 0.005f;
 
     protected async Task Interpolate() {
-        timeStep = (float)timeStepInput.Value;
+        timeStep = (float)TimeStepInput.Value;
         if (InterpolateTask is not null) {
             ContinueInterpolation = !ContinueInterpolation;
             return;
@@ -77,19 +77,19 @@
                     continue;
                 }
                 await glDrawer.ClearWithColor(0f, 0f, 0f, 1f);
-                var newTime = Time + timeStep;
+                var newTime = time + timeStep;
                 switch (newTime) {
                     case > 1f:
                         timeStep = -timeStep;
-                        newTime = Time + timeStep;
+                        newTime = time + timeStep;
                         break;
                     case < 0f:
                         timeStep = -timeStep;
-                        newTime = Time + timeStep;
+                        newTime = time + timeStep;
                         break;
                 }
-                Time = (float)newTime;
-                await glDrawer.SetTime((float)Time);
+                time = (float)newTime;
+                await glDrawer.SetTime((float)time);
 
                 await gl.DrawArraysAsync(Primitive.TRIANGLES, 0, VerticesCount);
             }

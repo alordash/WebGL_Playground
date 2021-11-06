@@ -41,10 +41,17 @@ namespace WebGL_Playground_Site.WebGLWrapping {
             return variableLocation;
         }
 
-        public async Task<WebGLUniformLocation> FillUniformI(string values, params int[] data) {
-            var variableLocation = await GL.GetUniformLocationAsync(Program.Program, values);
+        public async Task<WebGLUniformLocation> FillUniformI(string name, params int[] data) {
+            var variableLocation = await GL.GetUniformLocationAsync(Program.Program, name);
             await GL.UniformAsync(variableLocation, data);
             return variableLocation;
+        }
+
+        public async Task FillUniformArrayF(string name, float[] data, int step) {
+            for (var i = 0; i < data.Length; i += step) {
+                var values = data.Subsequence(i, step).ToArray();
+                await FillUniformF($"{name}[{(i / step).ToString()}]", values);
+            }
         }
 
         public async Task DrawBlankRectangle(bool prefill = true) {
@@ -83,17 +90,16 @@ namespace WebGL_Playground_Site.WebGLWrapping {
             await GL.DrawArraysAsync(Primitive.TRIANGLES, 0, beginVertices.Length);
         }
 
-        public async Task DrawVoronoiTesselation(float[] vertices, float[] colors) {
-            await FillUniformI("u_count", vertices.Length / 2); 
-            for (var i = 0; i < vertices.Length; i += 2) {
-                var values = vertices.Subsequence(i, 2).ToArray();
-                await FillUniformF($"u_positions[{(i / 2).ToString()}]", values);
-            }
+        public async Task DrawVoronoiTesselation(MeshData begin, MeshData end, float time) {
+            await SetTime(time);
+            
+            await FillUniformI("u_count", begin.Vertices.Length / 2);
 
-            for (var i = 0; i < colors.Length; i += 4) {
-                var values = colors.Subsequence(i, 4).ToArray();
-                await FillUniformF($"u_colors[{(i / 4).ToString()}]", values);
-            }
+            await FillUniformArrayF("u_begin_positions", begin.Vertices, 2);
+            await FillUniformArrayF("u_end_positions", end.Vertices, 2);
+
+            await FillUniformArrayF("u_colors", begin.Colors, 4);
+
             await DrawBlankRectangle();
         }
 
