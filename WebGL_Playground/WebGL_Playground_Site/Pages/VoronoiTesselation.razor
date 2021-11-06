@@ -12,7 +12,8 @@
 
 <BECanvas Width="800" Height="800" @ref="canvasReference"></BECanvas>
 <br/>
-<NumberInput @ref="pointsCountInput" IntegerNumber="true" DefaultValue="5" PlaceHolder="Number of points"/>
+<NumberInput @ref="pointsCountInput" IntegerNumber="true" DefaultValue="@DefaultPointsCount" PlaceHolder="Number of points"/>
+<input type="checkbox" @bind="DrawPoints">Draw points
 <br/>
 <button @onclick="Draw">Draw</button>
 
@@ -22,11 +23,16 @@
     private GLDrawer glDrawer;
 
     private NumberInput pointsCountInput;
-        private const int DefaultPointsCount = 5;
+        private const int DefaultPointsCount = 20;
     private IEnumerable<Point> Points = Point.GeneratePoints(DefaultPointsCount);
 
-    private async Task Draw() {
+    private bool DrawPoints;
 
+    private void RandomizeData() {
+        Points = Point.GeneratePoints((int)pointsCountInput.Value);
+    }
+
+    private async Task Draw() {
         await glDrawer.ClearWithColor(0.5f, 0.5f, 0.5f, 1f);
 
         Points = Point.GeneratePoints((int)pointsCountInput.Value);
@@ -34,7 +40,8 @@
             x.x, x.y
         }).ToArray();
         var colors = GLHelper.NormalizeColors(GLHelper.GenerateColorSets(vertices.Length / 2, ColorsGeneratorFlags.FixAlpha)).ToArray();
-        
+
+        await glDrawer.FillUniformI("u_highlight", DrawPoints ? 1 : 0);
         await glDrawer.DrawVoronoiTesselation(vertices, colors);
     }
 
