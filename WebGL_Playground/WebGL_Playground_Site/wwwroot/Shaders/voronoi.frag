@@ -6,27 +6,28 @@ uniform int u_count;
 uniform vec2 u_positions[max_iters];
 uniform vec4 u_colors[max_iters];
 
-float rand(vec2 co){
-    return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
-}
+varying vec4 v_position;
+
+const float threshold = 0.01;
 
 void main() {
-    gl_FragColor = vec4(rand(v_color.xy), rand(v_color.xy), 0.2, 1);
-    /*
-    int index = 0;
-    float minDst = 100.;
+    vec4 color = u_colors[0];
+    float minDst = 10033.;
     for(int i = 0; i < max_iters; i++) {
         if(i >= u_count) {
             break;
         }
-        vec4 p = vec4(u_positions[i], 0., 0.);
-        float dst = distance(a_position, p);
+        vec2 p = u_positions[i];
+        float dst = distance(v_position.xy, p);
+        if(dst < threshold) {
+            color = vec4(0., 0., 0., 1.);
+            break;
+        }
         if(dst < minDst) {
             minDst = dst;
-            index = i;
+            color = u_colors[i];
         }
     }
 
-    gl_Position = a_position;
-    v_color = u_colors[index];*/
+    gl_FragColor = color;
 }
