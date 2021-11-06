@@ -10,7 +10,7 @@
 
 <h3>Voronoi Tesselation</h3>
 
-<BECanvas Width="1000" Height="600" @ref="canvasReference"></BECanvas>
+<BECanvas Width="800" Height="800" @ref="canvasReference"></BECanvas>
 <br/>
 <NumberInput @ref="pointsCountInput" IntegerNumber="true" DefaultValue="5" PlaceHolder="Number of points"/>
 <br/>
@@ -35,10 +35,7 @@
         }).ToArray();
         var colors = GLHelper.NormalizeColors(GLHelper.GenerateColorSets(vertices.Length / 2, ColorsGeneratorFlags.FixAlpha)).ToArray();
         
-        await glDrawer.FillBuffer("a_position", 2, DataType.FLOAT, false, GLHelper.FillTrianglesVertices);
-        
-        await glDrawer.DrawBlankRectangle(false);
-    //        await glDrawer.DrawVoronoiTesselation(vertices, colors);
+        await glDrawer.DrawVoronoiTesselation(vertices, colors);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender) {
