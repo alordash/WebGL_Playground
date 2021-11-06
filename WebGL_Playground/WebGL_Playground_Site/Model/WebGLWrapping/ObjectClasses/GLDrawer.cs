@@ -45,8 +45,10 @@ namespace WebGL_Playground_Site.WebGLWrapping {
             return variableLocation;
         }
 
-        public async Task DrawBlankRectangle() {
-            await FillBuffer("a_position", 2, DataType.FLOAT, false, GLHelper.FillTrianglesVertices);
+        public async Task DrawBlankRectangle(bool prefill = true) {
+            if (prefill) {
+                await FillBuffer("a_position", 2, DataType.FLOAT, false, GLHelper.FillTrianglesVertices);
+            }
 
             await GL.DrawArraysAsync(Primitive.TRIANGLES, 0, GLHelper.FillTrianglesVertices.Length);
         }

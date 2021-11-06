@@ -25,6 +25,21 @@
         private const int DefaultPointsCount = 5;
     private IEnumerable<Point> Points = Point.GeneratePoints(DefaultPointsCount);
 
+    private float[] setRectangle(float x, float y, float width, float height) {
+        var x1 = x - width;
+        var x2 = x + width;
+        var y1 = y - height;
+        var y2 = y + height;
+        return new[] {
+            x1, y1,
+            x2, y1,
+            x1, y2,
+            x1, y2,
+            x2, y1,
+            x2, y2,
+        };
+    }
+
     private async Task Draw() {
 
         await glDrawer.ClearWithColor(0.5f, 0.5f, 0.5f, 1f);
@@ -52,8 +67,8 @@
         await gl.TexParameterAsync(TextureType.TEXTURE_2D, TextureParameter.TEXTURE_MAG_FILTER, (uint)TextureParameterValue.NEAREST);
 
         var values = new byte[] {
-            100, 100, 100, 255,
-            200, 200, 100, 255,
+            255, 0, 0, 255,
+            0, 255, 0, 255,
             0, 0, 255, 255,
             255, 255, 0, 255,
         };
@@ -63,7 +78,12 @@
 //        Console.WriteLine(pixels);
     //        await gl.TexImage2DAsync(Texture2DType.TEXTURE_2D, 0, PixelFormat.RGBA, 2, 2, PixelFormat.RGBA, PixelType.UNSIGNED_BYTE, values);
 
-        await glDrawer.DrawBlankRectangle();
+        var resolutionLocation = await gl.GetUniformLocationAsync(glDrawer.Program.Program, "u_resolution");
+        await gl.UniformAsync(resolutionLocation, canvasReference.Width, canvasReference.Height);
+
+        await glDrawer.FillBuffer("a_position", 2, DataType.FLOAT, false, setRectangle(0, 0, 2, 2));
+        
+        await glDrawer.DrawBlankRectangle(false);
     //        await glDrawer.DrawVoronoiTesselation(vertices, colors);
     }
 
