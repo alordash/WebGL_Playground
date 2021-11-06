@@ -25,21 +25,6 @@
         private const int DefaultPointsCount = 5;
     private IEnumerable<Point> Points = Point.GeneratePoints(DefaultPointsCount);
 
-    private float[] setRectangle(float x, float y, float width, float height) {
-        var x1 = x - width;
-        var x2 = x + width;
-        var y1 = y - height;
-        var y2 = y + height;
-        return new[] {
-            x1, y1,
-            x2, y1,
-            x1, y2,
-            x1, y2,
-            x2, y1,
-            x2, y2,
-        };
-    }
-
     private async Task Draw() {
 
         await glDrawer.ClearWithColor(0.5f, 0.5f, 0.5f, 1f);
@@ -50,14 +35,7 @@
         }).ToArray();
         var colors = GLHelper.NormalizeColors(GLHelper.GenerateColorSets(vertices.Length / 2, ColorsGeneratorFlags.FixAlpha)).ToArray();
 
-        await glDrawer.FillBuffer("a_texCoord", 2, DataType.FLOAT, false, new float[] {
-            0f, 0f,
-            1f, 0f,
-            0f, 1f,
-            0f, 1f,
-            1f, 0f,
-            1f, 1f,
-        });
+        await glDrawer.FillBuffer("a_texCoord", 2, DataType.FLOAT, false, GLHelper.FillTexturesVertices);
         var texture = await gl.CreateTextureAsync();
         await gl.BindTextureAsync(TextureType.TEXTURE_2D, texture);
 
@@ -74,14 +52,8 @@
         };
 
         await gl.TexImage2DAsync(JS, canvasReference, Texture2DType.TEXTURE_2D, 0, PixelFormat.RGBA, 2, 2, 0, PixelFormat.RGBA, PixelType.UNSIGNED_BYTE, values);
-//        var pixels = await JS.InvokeAsync<string>("glTexImage2D", canvasReference, Texture2DType.TEXTURE_2D, 0, PixelFormat.RGBA, 2, 2, 0, PixelFormat.RGBA, PixelType.UNSIGNED_BYTE, values);
-//        Console.WriteLine(pixels);
-    //        await gl.TexImage2DAsync(Texture2DType.TEXTURE_2D, 0, PixelFormat.RGBA, 2, 2, PixelFormat.RGBA, PixelType.UNSIGNED_BYTE, values);
 
-        var resolutionLocation = await gl.GetUniformLocationAsync(glDrawer.Program.Program, "u_resolution");
-        await gl.UniformAsync(resolutionLocation, canvasReference.Width, canvasReference.Height);
-
-        await glDrawer.FillBuffer("a_position", 2, DataType.FLOAT, false, setRectangle(0, 0, 2, 2));
+        await glDrawer.FillBuffer("a_position", 2, DataType.FLOAT, false, GLHelper.FillTrianglesVertices);
         
         await glDrawer.DrawBlankRectangle(false);
     //        await glDrawer.DrawVoronoiTesselation(vertices, colors);

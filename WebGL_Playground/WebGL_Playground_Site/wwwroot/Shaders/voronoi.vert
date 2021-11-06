@@ -5,8 +5,6 @@ varying vec2 v_texCoord;
 
 const int max_iters = 200;
 
-uniform vec2 u_resolution;
-
 uniform int u_count;
 uniform vec2 u_positions[max_iters];
 uniform vec4 u_colors[max_iters];
@@ -14,11 +12,6 @@ uniform vec4 u_colors[max_iters];
 varying vec4 v_color;
 
 void main() {
-    vec2 zeroToOne = a_position.xy / u_resolution;
-
-    vec2 zeroToTwo = zeroToOne * 2.0;
-
-    vec2 clipSpace = zeroToTwo - 1.0;
 
     gl_Position = a_position;//vec4(clipSpace * vec2(1, -1), 0, 1);
 

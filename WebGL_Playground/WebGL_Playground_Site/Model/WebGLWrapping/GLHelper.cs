@@ -50,13 +50,22 @@ namespace WebGL_Playground_Site.WebGLWrapping {
             return new TrianglesSet { vertices = vertices, colors = colors };
         }
 
+        public static float[] FillTexturesVertices { get; } = {
+            0, 1,
+            1, 1,
+            0, 0,
+            1, 1,
+            0, 0,
+            1, 0,
+        };
+
         public static float[] FillTrianglesVertices { get; } = {
-            -1f, -1f,
-            -1f, 1f,
-            1f, -1f,
-            -1f, 1f,
-            1f, 1f,
-            1f, -1f,
+            -1, 1,
+            1, 1,
+            -1, -1,
+            1, 1,
+            -1, -1,
+            1, -1,
         };
     }
 }
