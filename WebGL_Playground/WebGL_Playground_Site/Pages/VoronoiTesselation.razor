@@ -12,41 +12,57 @@
 
 <BECanvas Width="800" Height="800" @ref="canvasReference"></BECanvas>
 <br/>
-<NumberInput @ref="pointsCountInput" IntegerNumber="true" DefaultValue="@DefaultPointsCount" PlaceHolder="Number of points"/>
+<NumberInput @ref="PointsCountInput" IntegerNumber="true" DefaultValue="@DefaultPointsCount" PlaceHolder="Number of points"/>
 <input type="checkbox" @bind="DrawPoints">Draw points
 <br/>
-<button @onclick="Draw">Draw</button>
+<button @onclick="DrawButtonClick">Draw</button>
 
 @code {
     private BECanvasComponent canvasReference;
     private WebGLContext gl;
     private GLDrawer glDrawer;
 
-    private NumberInput pointsCountInput;
-        private const int DefaultPointsCount = 20;
-    private IEnumerable<Point> Points = Point.GeneratePoints(DefaultPointsCount);
+    public NumberInput PointsCountInput;
+        public const int DefaultPointsCount = 20;
 
-    private bool DrawPoints;
+    private IEnumerable<float> vertices;
+    private IEnumerable<float> colors;
+    private float[] verticesValues;
+    private float[] colorsValues;
+
+    private bool drawPoints = false;
+    private bool DrawPoints {
+        get => drawPoints;
+        set {
+            drawPoints = value;
+            Draw();
+        }
+    }
 
     private void RandomizeData() {
-        Points = Point.GeneratePoints((int)pointsCountInput.Value);
+        var count = (int)PointsCountInput.Value;
+        vertices = GLHelper.GenerateFloats(2 * count);
+        colors = GLHelper.NormalizeColors(GLHelper.GenerateColorSets(count, ColorsGeneratorFlags.FixAlpha));
+        verticesValues = vertices.ToArray();
+        colorsValues = colors.ToArray();
     }
 
     private async Task Draw() {
         await glDrawer.ClearWithColor(0.5f, 0.5f, 0.5f, 1f);
 
-        Points = Point.GeneratePoints((int)pointsCountInput.Value);
-        var vertices = Points.SelectMany(x => new[] {
-            x.x, x.y
-        }).ToArray();
-        var colors = GLHelper.NormalizeColors(GLHelper.GenerateColorSets(vertices.Length / 2, ColorsGeneratorFlags.FixAlpha)).ToArray();
-
         await glDrawer.FillUniformI("u_highlight", DrawPoints ? 1 : 0);
-        await glDrawer.DrawVoronoiTesselation(vertices, colors);
+        await glDrawer.DrawVoronoiTesselation(verticesValues, colorsValues);
+    }
+
+    private async Task DrawButtonClick() {
+        RandomizeData();
+        await Draw();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender) {
         if (firstRender) {
+            RandomizeData();
+
             gl = GLContext.GL = await canvasReference.CreateWebGLAsync(new WebGLContextAttributes {
                 PowerPreference = WebGLContextAttributes.POWER_PREFERENCE_HIGH_PERFORMANCE
             });
