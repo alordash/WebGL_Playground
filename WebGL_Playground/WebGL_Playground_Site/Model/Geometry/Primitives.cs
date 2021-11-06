@@ -14,11 +14,11 @@ namespace WebGL_Playground_Site.Geometry {
         }
 
         public static IEnumerable<Point> FloatsToPoints(IEnumerable<float> values) {
-            return values.Zip(values.Skip(1)).Select(x => new Point(x.First, x.Second));
+            return values.SelectTwo((x, y) => new Point(x, y));
         }
 
         public static IEnumerable<Point> GeneratePoints(int count) {
-            return Point.FloatsToPoints(GLHelper.GenerateFloats(count));
+            return Point.FloatsToPoints(GLHelper.GenerateFloats(count * 2));
         }
     }
 }

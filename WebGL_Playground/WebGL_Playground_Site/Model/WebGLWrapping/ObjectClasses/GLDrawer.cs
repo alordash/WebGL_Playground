@@ -87,13 +87,14 @@ namespace WebGL_Playground_Site.WebGLWrapping {
             await FillUniformI("u_count", vertices.Length / 2); 
             for (var i = 0; i < vertices.Length; i += 2) {
                 var values = vertices.Subsequence(i, 2).ToArray();
-                await FillUniformF($"u_positions[{i.ToString()}]", values);
+                await FillUniformF($"u_positions[{(i / 2).ToString()}]", values);
             }
 
             for (var i = 0; i < colors.Length; i += 4) {
                 var values = colors.Subsequence(i, 4).ToArray();
-                await FillUniformF($"u_colors[{i.ToString()}]", values);
+                await FillUniformF($"u_colors[{(i / 4).ToString()}]", values);
             }
+            await DrawBlankRectangle();
         }
 
         // VIP
