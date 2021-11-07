@@ -70,7 +70,7 @@ namespace WebGL_Playground_Site.WebGLWrapping {
 
         public const float V = 3f;
         public static float[] MapTrianglesVertices(float width, float height) {
-            return FillTexturesVertices.SelectTwo((x, y) => new[] { x * width, y * width }).SelectMany(x => x).ToArray();
+            return FillTexturesVertices.SelectTwo((x, y) => new[] { x * width, y * height }).SelectMany(x => x).ToArray();
         }
     }
 

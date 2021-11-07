@@ -21,11 +21,10 @@ window.glImage = async (dotNetHelper, canvas, target, level, internalFormat, for
     let gl = canvas.canvasReference.getContext("webgl");
     img.onload = () => {
         console.log("Onload triggered");
-        let w = img.width;
+        var w = img.width;
+        var h = img.height;
         canvas.canvasReference.width = w;
-        let h = img.height;
         canvas.canvasReference.height = h;
-        gl.viewport(0, 0, w, h);
         gl.texImage2D(target, level, internalFormat, format, type, img);
         dotNetHelper.invokeMethodAsync('ImageLoaded', w, h);
     }
