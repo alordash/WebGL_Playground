@@ -2,15 +2,22 @@
 
 @using Blazor.Extensions.Canvas.WebGL;
 @using WebGLWrapping;
+@using Geometry;
 @inject HttpClient Http;
 @inject IJSRuntime JS
 
 <h3>Image Convolution</h3>
 
-<input type="text" @bind="imagePath">
+<input type="text" @bind="imagePath" placeholder="Path to image...">
 <br/>
 <img id="GLImageLoader" crossorigin="anonymous" style="display: none">
 <BECanvas Width="800" Height="800" @ref="canvasReference"></BECanvas>
+<br/>
+<select @bind="currentKernel">
+    @foreach (var pair in ConvolutionKernels.DefaultKernels) {
+        <option value="@pair.Key">@pair.Key</option>
+    }
+</select>
 <br/>
 <button @onclick="DrawButtonClick">Draw</button>
 
@@ -19,16 +26,23 @@
     private WebGLContext gl;
     private GLDrawer glDrawer;
 
-    private string imagePath = "Data/image.jpg";
+    private string imagePath = "Data/image2.jpg";
+
+    private string currentKernel = "edgeDetect";
 
     private async Task Draw() {
         await glDrawer.ClearWithColor(0.5f, 0.5f, 0.5f, 1f);
-
+        var kernel = ConvolutionKernels.DefaultKernels[currentKernel];
+        var kernelWeight = kernel.Sum();
+        kernelWeight = kernelWeight <= 0 ? 1 : kernelWeight;
+        await glDrawer.FillUniformArrayF("u_kernel", kernel, 1);
+        await glDrawer.FillUniformF("u_kernelWeight", kernelWeight);
         await glDrawer.DrawImage(JS, DotNetObjectReference.Create(this), canvasReference, imagePath);
     }
 
     [JSInvokable]
     public async void ImageLoaded(float width, float height) {
+        await glDrawer.FillUniformF("u_textureSize", canvasReference.Width, canvasReference.Height);
         await glDrawer.FillUniformF("u_resolution", canvasReference.Width, canvasReference.Height);
         await glDrawer.DrawBlankRectangle(GLHelper.MapTrianglesVertices(width, height));
     }
