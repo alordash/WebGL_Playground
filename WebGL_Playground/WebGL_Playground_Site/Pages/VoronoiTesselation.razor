@@ -87,13 +87,11 @@
                         newTime = time + timeStep;
                         break;
                 }
-                time = (float)newTime;
-                Console.WriteLine($"Interpolating, time {time}");
+                time = newTime;
 
                 await glDrawer.FillUniformI("u_highlight", DrawPoints ? 1 : 0);
                 await glDrawer.SetTime(time);
                 await glDrawer.DrawBlankRectangle(false);
-    //                await glDrawer.DrawVoronoiTesselation(beginMesh, beginMesh, time);
             }
         });
     }
