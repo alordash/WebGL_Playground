@@ -25,6 +25,9 @@ namespace WebGL_Playground_Site.WebGLWrapping {
         }
 
         public async Task<uint> FillBuffer<T>(string name, int size, DataType dataType, bool normalize, T[] data) {
+            if (data.Length <= 0) {
+                return uint.MaxValue;
+            }
             var buffer = await GL.CreateBufferAsync();
             await GL.BindBufferAsync(BufferType.ARRAY_BUFFER, buffer);
             await GL.BufferDataAsync(BufferType.ARRAY_BUFFER, data, BufferUsageHint.STATIC_DRAW);
@@ -54,10 +57,12 @@ namespace WebGL_Playground_Site.WebGLWrapping {
             }
         }
 
-        public async Task DrawBlankRectangle(bool prefill = true) {
-            if (prefill) {
-                await FillBuffer("a_position", 2, DataType.FLOAT, false, GLHelper.FillTrianglesVertices);
-            }
+        public async Task DrawBlankRectangle() {
+            await DrawBlankRectangle(GLHelper.FillTrianglesVertices);
+        }
+
+        public async Task DrawBlankRectangle(float[] trianglesVertices) {
+            await FillBuffer("a_position", 2, DataType.FLOAT, false, trianglesVertices);
 
             await GL.DrawArraysAsync(Primitive.TRIANGLES, 0, GLHelper.FillTrianglesVertices.Length);
         }
@@ -92,7 +97,7 @@ namespace WebGL_Playground_Site.WebGLWrapping {
 
         public async Task DrawVoronoiTesselation(MeshData begin, MeshData end, float time) {
             await SetTime(time);
-            
+
             await FillUniformI("u_count", begin.Vertices.Length / 2);
 
             await FillUniformArrayF("u_begin_positions", begin.Vertices, 2);
@@ -104,7 +109,7 @@ namespace WebGL_Playground_Site.WebGLWrapping {
         }
 
         // VIP
-        public async Task DrawTexture(IJSRuntime JS, BECanvasComponent canvasReference) {
+        public async Task DrawImage<T>(IJSRuntime JS, DotNetObjectReference<T> dotNetHelper, BECanvasComponent canvasReference, string imagePath) where T : class {
             await FillBuffer("a_texCoord", 2, DataType.FLOAT, false, GLHelper.FillTexturesVertices);
             var texture = await GL.CreateTextureAsync();
             await GL.BindTextureAsync(TextureType.TEXTURE_2D, texture);
@@ -114,14 +119,7 @@ namespace WebGL_Playground_Site.WebGLWrapping {
             await GL.TexParameterAsync(TextureType.TEXTURE_2D, TextureParameter.TEXTURE_MIN_FILTER, (uint)TextureParameterValue.NEAREST);
             await GL.TexParameterAsync(TextureType.TEXTURE_2D, TextureParameter.TEXTURE_MAG_FILTER, (uint)TextureParameterValue.NEAREST);
 
-            var values = new byte[] {
-                255, 0, 0, 255,
-                0, 255, 0, 255,
-                0, 0, 255, 255,
-                255, 255, 0, 255,
-            };
-
-            await GL.TexImage2DAsync(JS, canvasReference, Texture2DType.TEXTURE_2D, 0, PixelFormat.RGBA, 2, 2, 0, PixelFormat.RGBA, PixelType.UNSIGNED_BYTE, values);
+            await GL.TexImage2DAsync(JS, dotNetHelper, canvasReference, Texture2DType.TEXTURE_2D, 0, PixelFormat.RGBA, PixelFormat.RGBA, PixelType.UNSIGNED_BYTE, imagePath);
         }
     }
 }

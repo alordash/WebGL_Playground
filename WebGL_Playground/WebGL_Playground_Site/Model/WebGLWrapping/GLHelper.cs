@@ -50,7 +50,7 @@ namespace WebGL_Playground_Site.WebGLWrapping {
             return new TrianglesSet { vertices = vertices, colors = colors };
         }
 
-        public static float[] FillTexturesVertices { get; } = {
+        public static readonly float[] FillTexturesVertices = {
             0, 1,
             1, 1,
             0, 0,
@@ -59,7 +59,7 @@ namespace WebGL_Playground_Site.WebGLWrapping {
             1, 0,
         };
 
-        public static float[] FillTrianglesVertices { get; } = {
+        public static readonly float[] FillTrianglesVertices = {
             -1, 1,
             1, 1,
             -1, -1,
@@ -67,6 +67,11 @@ namespace WebGL_Playground_Site.WebGLWrapping {
             -1, -1,
             1, -1,
         };
+
+        public const float V = 3f;
+        public static float[] MapTrianglesVertices(float width, float height) {
+            return FillTexturesVertices.SelectTwo((x, y) => new[] { x * width, y * width }).SelectMany(x => x).ToArray();
+        }
     }
 
     public class MeshData {

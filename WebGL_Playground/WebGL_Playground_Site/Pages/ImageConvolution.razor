@@ -1,0 +1,56 @@
+﻿@page "/ImageConvolution"
+
+@using Blazor.Extensions.Canvas.WebGL;
+@using WebGLWrapping;
+@inject HttpClient Http;
+@inject IJSRuntime JS
+
+<h3>Image Convolution</h3>
+
+<input type="text" @bind="imagePath">
+<br/>
+<img id="GLImageLoader" crossorigin="anonymous" style="display: none">
+<BECanvas Width="800" Height="800" @ref="canvasReference"></BECanvas>
+<br/>
+<button @onclick="DrawButtonClick">Draw</button>
+
+@code {
+    private BECanvasComponent canvasReference;
+    private WebGLContext gl;
+    private GLDrawer glDrawer;
+
+    private string imagePath = "Data/image.jpg";
+
+    private async Task Draw() {
+        await glDrawer.ClearWithColor(0.5f, 0.5f, 0.5f, 1f);
+
+        await glDrawer.DrawImage(JS, DotNetObjectReference.Create(this), canvasReference, imagePath);
+    }
+
+    [JSInvokable]
+    public async void ImageLoaded(float width, float height) {
+        await glDrawer.FillUniformF("u_resolution", canvasReference.Width, canvasReference.Height);
+        await glDrawer.DrawBlankRectangle(GLHelper.MapTrianglesVertices(width, height));
+    }
+
+    private async Task DrawButtonClick() {
+        await Draw();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender) {
+        if (firstRender) {
+            gl = GLContext.GL = await canvasReference.CreateWebGLAsync(new WebGLContextAttributes {
+                PowerPreference = WebGLContextAttributes.POWER_PREFERENCE_HIGH_PERFORMANCE
+            });
+
+            var vertShaderSource = await Misc.GetFileContents("Shaders/imageConvolution.vert", Http);
+            var fragShaderSource = await Misc.GetFileContents("Shaders/imageConvolution.frag", Http);
+
+            var glProgram = await GLProgram.SetUpProgram(vertShaderSource, fragShaderSource);
+            glDrawer = new GLDrawer(glProgram);
+            await gl.UseProgramAsync(glProgram);
+            await glDrawer.ClearWithColor(0.5f, 0.5f, 0.5f, 1f);
+        }
+    }
+
+}

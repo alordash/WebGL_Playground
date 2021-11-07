@@ -2,9 +2,6 @@
 
 @using Blazor.Extensions.Canvas.WebGL;
 @using WebGLWrapping;
-@using System.Collections
-@using WebGL_Playground_Site;
-@using WebGL_Playground_Site.Geometry
 @inject HttpClient Http;
 @inject IJSRuntime JS
 
@@ -91,7 +88,7 @@
 
                 await glDrawer.FillUniformI("u_highlight", DrawPoints ? 1 : 0);
                 await glDrawer.SetTime(time);
-                await glDrawer.DrawBlankRectangle(false);
+                await glDrawer.DrawBlankRectangle(Array.Empty<float>());
             }
         });
     }
@@ -113,5 +110,4 @@
             await glDrawer.ClearWithColor(0.5f, 0.5f, 0.5f, 1f);
         }
     }
-
 }

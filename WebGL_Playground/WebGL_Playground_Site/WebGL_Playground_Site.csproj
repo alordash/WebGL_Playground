@@ -41,7 +41,6 @@
 
   <ItemGroup>
     <Content Remove="wwwroot\Data\img2.jpg" />
-    <Content Remove="Pages\ImageConvolution.razor" />
   </ItemGroup>
 
   <ItemGroup>
