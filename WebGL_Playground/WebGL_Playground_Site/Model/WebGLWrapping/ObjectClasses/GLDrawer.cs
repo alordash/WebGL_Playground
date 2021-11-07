@@ -109,7 +109,9 @@ namespace WebGL_Playground_Site.WebGLWrapping {
         }
 
         // VIP
-        public async Task DrawImage<T>(IJSRuntime JS, DotNetObjectReference<T> dotNetHelper, BECanvasComponent canvasReference, string imagePath) where T : class {
+        public async Task DrawImage<T>(IJSRuntime JS, DotNetObjectReference<T> dotNetHelper, BECanvasComponent canvasReference, string imagePath, float time) where T : class {
+            await SetTime(time);
+            
             await FillBuffer("a_texCoord", 2, DataType.FLOAT, false, GLHelper.FillTexturesVertices);
             var texture = await GL.CreateTextureAsync();
             await GL.BindTextureAsync(TextureType.TEXTURE_2D, texture);
