@@ -7,21 +7,19 @@
 @inject HttpClient Http;
 @inject IJSRuntime JS
 
+<img id="GLImageLoader" crossorigin="anonymous" style="display: none">
+
 <h3>Image Convolution</h3>
 
 <input type="text" @bind="imagePath" placeholder="Path to image...">
 <br/>
-<img id="GLImageLoader" crossorigin="anonymous" style="display: none">
-<BECanvas Width="200" Height="900" @ref="canvasReference"></BECanvas>
-<br/>
-<select @bind="currentKernel">
+<select @bind="CurrentKernel">
     @foreach (var pair in ConvolutionKernels.DefaultKernels) {
         <option value="@pair.Key">@pair.Key</option>
     }
 </select>
 <br/>
-<button @onclick="DrawButtonClick">Draw</button>
-
+<BECanvas Width="200" Height="900" @ref="canvasReference"></BECanvas>
 @code {
     private BECanvasComponent canvasReference;
 
@@ -31,9 +29,15 @@
     private string imagePath = "Data/image2.jpg";
 
     private string currentKernel = "normal";
+    public string CurrentKernel {
+        get => currentKernel;
+        set {
+            currentKernel = value;
+            Draw();
+        }
+    }
 
     private async Task Draw() {
-        await glDrawer.ClearWithColor(0.5f, 0.5f, 0.5f, 1f);
         var kernel = ConvolutionKernels.DefaultKernels[currentKernel];
         var kernelWeight = kernel.Sum();
         kernelWeight = kernelWeight <= 0 ? 1 : kernelWeight;
@@ -52,10 +56,6 @@
         await glDrawer.DrawBlankRectangle(GLHelper.MapTrianglesVertices(width, height));
     }
 
-    private async Task DrawButtonClick() {
-        await Draw();
-    }
-
     protected override async Task OnAfterRenderAsync(bool firstRender) {
         if (firstRender) {
             gl = GLContext.GL = await canvasReference.CreateWebGLAsync(new WebGLContextAttributes {
@@ -69,6 +69,7 @@
             glDrawer = new GLDrawer(glProgram);
             await gl.UseProgramAsync(glProgram);
             await glDrawer.ClearWithColor(0.5f, 0.5f, 0.5f, 1f);
+            Draw();
         }
     }
 
