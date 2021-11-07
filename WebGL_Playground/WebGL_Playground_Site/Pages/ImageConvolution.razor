@@ -4,6 +4,7 @@
 @using WebGLWrapping;
 @using Geometry;
 @using System.Reflection.Metadata
+@using System.Globalization
 @inject HttpClient Http;
 @inject IJSRuntime JS
 
@@ -14,16 +15,25 @@
 <input type="text" @bind="imagePath" @onkeyup="ImagePathKeyUp" placeholder="Path to image...">
 <br/>
 <select @bind="CurrentKernel">
-    @foreach (var key in ConvolutionKernels.DefaultKernels.Keys) {
+    @foreach (var key in UsingKernels.Keys) {
         <option value="@key">@key</option>
     }
 </select>
+<br/>
+<input type="range" @bind="Time" min="0" max="1" step="0.01"/>
 <br/>
 <BECanvas Width="200" Height="900" @ref="canvasReference"></BECanvas>
 <br/>
 <NumberInput @ref="TimeStepInput" DefaultValue="0.005"/>
 <button @onclick="Interpolate">Interpolate</button>
+
 @code {
+
+    public static readonly Dictionary<string, float[]> UsingKernels = ConvolutionKernels.DefaultKernels;
+    private readonly float k = UsingKernels.Count - 1;
+    private readonly float[] kernels = UsingKernels.Values.SelectMany(x => x).ToArray();
+
+
     private BECanvasComponent canvasReference;
 
     private WebGLContext gl;
@@ -36,8 +46,9 @@
         get => currentKernel;
         set {
             currentKernel = value;
-            var index = ConvolutionKernels.DefaultKernels.Keys.ToList().IndexOf(currentKernel);
-            time = index / (float)ConvolutionKernels.DefaultKernels.Count;
+            var index = UsingKernels.Keys.ToList().IndexOf(currentKernel);
+            time = index / k - 0.001f;
+            Console.WriteLine($"index = {index}, time = {time}");
             Draw();
         }
     }
@@ -49,7 +60,7 @@
     }
 
     private async Task Draw() {
-//        var kernel = ConvolutionKernels.DefaultKernels[currentKernel];
+    //        var kernel = UsingKernels[currentKernel];
         await glDrawer.DrawImage(JS, DotNetObjectReference.Create(this), canvasReference, imagePath, time);
     }
 
@@ -63,8 +74,20 @@
         await glDrawer.DrawBlankRectangle(GLHelper.MapTrianglesVertices(width, height));
     }
 
+    private async Task LightDraw() {
+        await glDrawer.SetTime(time);
+        await glDrawer.DrawBlankRectangle(Array.Empty<float>());
+    }
+
     public NumberInput TimeStepInput;
     public float time = 0f;
+    public float Time {
+        get => time;
+        set {
+            time = value;
+            LightDraw();
+        }
+    }
     private Task InterpolateTask;
     private bool ContinueInterpolation = true;
     private float timeStep = 0.005f;
@@ -76,7 +99,7 @@
             return;
         }
         InterpolateTask = Task.Run(async () => {
-            var interval = (int)(1000 * timeStep);
+            var interval = (int)(3000 * timeStep);
             while (true) {
                 await Task.Delay(interval);
                 if (!ContinueInterpolation) {
@@ -94,10 +117,9 @@
                         newTime = time + timeStep;
                         break;
                 }
-                time = newTime;
+                Time = newTime;
 
-                await glDrawer.SetTime(time);
-                await glDrawer.DrawBlankRectangle(Array.Empty<float>());
+                await LightDraw();
             }
         });
     }
@@ -115,8 +137,9 @@
             glDrawer = new GLDrawer(glProgram);
             await gl.UseProgramAsync(glProgram);
             await glDrawer.ClearWithColor(0.5f, 0.5f, 0.5f, 1f);
-            
-            var kernels = ConvolutionKernels.DefaultKernels.SelectMany(x => x.Value).ToArray();
+
+            var kernels = UsingKernels.Values.SelectMany(x => x).ToArray();
+            await glDrawer.FillUniformF("u_k", k);
             await glDrawer.FillUniformArrayF("u_kernels", kernels, 1);
             Console.WriteLine($"Kernels count = {kernels.Length}");
             Draw();

@@ -145,5 +145,10 @@ namespace WebGL_Playground_Site.Geometry {
                 }
             }
         };
+
+        public static readonly Dictionary<string, float[]> MyKernels = new Dictionary<string, float[]>() {
+            { "sobelHorizontal", DefaultKernels["sobelHorizontal"] },
+            { "sobelVertical", DefaultKernels["sobelVertical"] },
+        };
     }
 }
