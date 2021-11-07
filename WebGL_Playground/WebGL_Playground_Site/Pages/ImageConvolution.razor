@@ -11,7 +11,7 @@
 
 <h3>Image Convolution</h3>
 
-<input type="text" @bind="imagePath" placeholder="Path to image...">
+<input type="text" @bind="imagePath" @onkeyup="ImagePathKeyUp" placeholder="Path to image...">
 <br/>
 <select @bind="CurrentKernel">
     @foreach (var pair in ConvolutionKernels.DefaultKernels) {
@@ -33,6 +33,12 @@
         get => currentKernel;
         set {
             currentKernel = value;
+            Draw();
+        }
+    }
+
+    private async Task ImagePathKeyUp(KeyboardEventArgs e) {
+        if (e.Key == "Enter") {
             Draw();
         }
     }
