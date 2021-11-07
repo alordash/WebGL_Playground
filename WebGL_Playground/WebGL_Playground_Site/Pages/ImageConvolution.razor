@@ -20,12 +20,13 @@
     }
 </select>
 <br/>
-<input type="range" @bind="Time" min="0" max="1" step="0.01"/>
-<br/>
+<BECanvas Width="200" Height="900" @ref="canvasReference"></BECanvas>
 <BECanvas Width="200" Height="900" @ref="canvasReference"></BECanvas>
 <br/>
 <NumberInput @ref="TimeStepInput" DefaultValue="0.005"/>
 <button @onclick="Interpolate">Interpolate</button>
+<br/>
+<input type="range" @bind="Time" min="0" max="1" step="0.01"/>
 
 @code {
 
@@ -61,7 +62,7 @@
 
     private async Task Draw() {
     //        var kernel = UsingKernels[currentKernel];
-        await glDrawer.DrawImage(JS, DotNetObjectReference.Create(this), canvasReference, imagePath, time);
+        await glDrawer.DrawImage(JS, DotNetObjectReference.Create(this), canvasReference, imagePath, Time);
     }
 
     [JSInvokable]
@@ -75,7 +76,7 @@
     }
 
     private async Task LightDraw() {
-        await glDrawer.SetTime(time);
+        await glDrawer.SetTime(Time);
         await glDrawer.DrawBlankRectangle(Array.Empty<float>());
     }
 
@@ -106,20 +107,19 @@
                     continue;
                 }
                 await glDrawer.ClearWithColor(0f, 0f, 0f, 1f);
-                var newTime = time + timeStep;
+                var newTime = Time + timeStep;
                 switch (newTime) {
                     case > 1f:
                         timeStep = -timeStep;
-                        newTime = time + timeStep;
+                        newTime = Time + timeStep;
                         break;
                     case < 0f:
                         timeStep = -timeStep;
-                        newTime = time + timeStep;
+                        newTime = Time + timeStep;
                         break;
                 }
                 Time = newTime;
-
-                await LightDraw();
+                await InvokeAsync(StateHasChanged);
             }
         });
     }
