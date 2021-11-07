@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
 namespace WebGL_Playground_Site.Geometry {
-    public class ConvolutionKernels {
-        public static Dictionary<string, float[]> DefaultKernels = new Dictionary<string, float[]>() {
+    public static class ConvolutionKernels {
+        public static readonly Dictionary<string, float[]> DefaultKernels = new Dictionary<string, float[]>() {
             {
                 "normal",
                 new float[] {

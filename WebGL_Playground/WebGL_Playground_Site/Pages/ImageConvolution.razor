@@ -14,8 +14,8 @@
 <input type="text" @bind="imagePath" @onkeyup="ImagePathKeyUp" placeholder="Path to image...">
 <br/>
 <select @bind="CurrentKernel">
-    @foreach (var pair in ConvolutionKernels.DefaultKernels) {
-        <option value="@pair.Key">@pair.Key</option>
+    @foreach (var key in ConvolutionKernels.DefaultKernels.Keys) {
+        <option value="@key">@key</option>
     }
 </select>
 <br/>
@@ -36,6 +36,8 @@
         get => currentKernel;
         set {
             currentKernel = value;
+            var index = ConvolutionKernels.DefaultKernels.Keys.ToList().IndexOf(currentKernel);
+            time = index / (float)ConvolutionKernels.DefaultKernels.Count;
             Draw();
         }
     }

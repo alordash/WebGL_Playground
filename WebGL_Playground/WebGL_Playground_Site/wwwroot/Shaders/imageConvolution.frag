@@ -1,6 +1,6 @@
 ﻿precision mediump float;
 
-#define OFFSET i * 9
+#define OFFSET i * k
 
 uniform sampler2D u_image;
 uniform vec2 u_textureSize;
