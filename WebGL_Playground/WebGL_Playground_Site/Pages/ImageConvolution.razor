@@ -18,7 +18,8 @@
     @foreach (var key in UsingKernels.Keys) {
         <option value="@key">@key</option>
     }
-</select>
+</select> 
+<input type="checkbox" @bind="ShowOriginal"> Show original
 <br/>
 <BECanvas Width="200" Height="900" @ref="canvasReference"></BECanvas>
 <br/>
@@ -32,8 +33,7 @@
     public static readonly Dictionary<string, float[]> UsingKernels = ConvolutionKernels.MyKernels;
     private readonly float k = UsingKernels.Count - 1;
     private readonly float[] kernels = UsingKernels.Values.SelectMany(x => x).ToArray();
-
-
+    
     private BECanvasComponent canvasReference;
 
     private WebGLContext gl;
@@ -59,8 +59,17 @@
         }
     }
 
+    private bool showOriginal = false;
+    public bool ShowOriginal {
+        get => showOriginal;
+        set {
+            showOriginal = value;
+            LightDraw();
+        }
+    }
+
     private async Task Draw() {
-    //        var kernel = UsingKernels[currentKernel];
+        await glDrawer.FillUniformI("u_showOriginal", showOriginal ? 1 : 0);
         await glDrawer.DrawImage(JS, DotNetObjectReference.Create(this), canvasReference, imagePath, Time);
     }
 
@@ -75,6 +84,7 @@
     }
 
     private async Task LightDraw() {
+        await glDrawer.FillUniformI("u_showOriginal", showOriginal ? 1 : 0);
         await glDrawer.SetTime(Time);
         await glDrawer.DrawBlankRectangle(Array.Empty<float>());
     }

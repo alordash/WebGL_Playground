@@ -7,6 +7,7 @@ uniform vec2 u_textureSize;
 
 uniform float u_time;
 uniform float u_k;
+uniform bool u_showOriginal;
 
 const int max_iter = 100;
 
@@ -19,6 +20,10 @@ float Interpolate(int i) {
 }
 
 void main() {
+    if(u_showOriginal) {
+        gl_FragColor = texture2D(u_image, v_texCoord);
+        return;
+    }
     vec2 onePixel = vec2(1.0, 1.0) / u_textureSize;
     vec4 colorSum = vec4(0., 0., 0., 0.);
     float v = u_time * u_k;

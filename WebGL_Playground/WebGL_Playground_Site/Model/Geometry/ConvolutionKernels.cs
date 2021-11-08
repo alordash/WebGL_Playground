@@ -175,7 +175,7 @@ namespace WebGL_Playground_Site.Geometry {
                     -2, 0,  2,
                     -1, 0,  1,
                 }
-            },{
+            }, {
                 "v4-1",
                 new float[] {
                     1,  2,  1,
