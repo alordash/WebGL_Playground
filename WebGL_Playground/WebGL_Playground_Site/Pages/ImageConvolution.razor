@@ -29,7 +29,7 @@
 
 @code {
 
-    public static readonly Dictionary<string, float[]> UsingKernels = ConvolutionKernels.DefaultKernels;
+    public static readonly Dictionary<string, float[]> UsingKernels = ConvolutionKernels.MyKernels;
     private readonly float k = UsingKernels.Count - 1;
     private readonly float[] kernels = UsingKernels.Values.SelectMany(x => x).ToArray();
 
@@ -109,8 +109,7 @@
                 var newTime = Time + timeStep;
                 switch (newTime) {
                     case > 1f:
-                        timeStep = -timeStep;
-                        newTime = Time + timeStep;
+                        newTime = 0f;
                         break;
                     case < 0f:
                         timeStep = -timeStep;
