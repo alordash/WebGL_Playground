@@ -27,8 +27,12 @@
 <button @onclick="Interpolate">Interpolate</button>
 <br/>
 <input type="range" @bind="Time" min="0" max="1" step="0.01"/>
+<br/>
+<MatrixDisplay @ref="asdasd" Matrix="ConvolutionKernels.KernelToMatrix(UsingKernels.Values.ToArray()[0], 3, 3)"></MatrixDisplay>
 
 @code {
+
+    MatrixDisplay asdasd;
 
     public static readonly Dictionary<string, float[]> UsingKernels = ConvolutionKernels.MyKernels;
     private readonly float k = UsingKernels.Count - 1;

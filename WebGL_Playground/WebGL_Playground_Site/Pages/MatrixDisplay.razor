@@ -1,0 +1,30 @@
+﻿@using System.Globalization
+
+@for (int y = 0; y < Height; y++) {
+    @for (int x = 0; x < Width; x++) {
+        <textarea @bind="Matrix[x,y]"></textarea>
+    }
+    <br/>
+}
+
+@code {
+    
+    [Parameter]
+    public float[,] Matrix { get; set; }
+
+    private int width;
+    public int Width {
+        get => width;
+    }
+
+    private int height;
+    public int Height {
+        get => height;
+    }
+    
+    
+    protected override void OnParametersSet() {
+        width = Matrix.GetLength(0);
+        height = Matrix.GetLength(1);
+    }
+}

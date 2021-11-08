@@ -1,7 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace WebGL_Playground_Site.Geometry {
     public static class ConvolutionKernels {
+        public static float[,] KernelToMatrix(float[] kernel, int width, int height) {
+            if (kernel.Length < width * height) {
+                throw new ArgumentOutOfRangeException();
+            }
+            float[,] matrix = new float[width, height];
+            for (int i = 0; i < width; i++) {
+                for (int j = 0; j < height; j++) {
+                    matrix[i, j] = kernel[j * height + i];
+                }
+            }
+
+            return matrix;
+        }
+
         public static readonly Dictionary<string, float[]> DefaultKernels = new Dictionary<string, float[]>() {
             {
                 "normal",
