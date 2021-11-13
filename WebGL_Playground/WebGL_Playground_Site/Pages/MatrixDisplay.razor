@@ -6,7 +6,7 @@
         var yLoc = y;
         @for (int x = 0; x < Width; x++) {
             var xLoc = x;
-            <textarea class="matrixdisplay" @bind="Matrix[xLoc, yLoc]" @onwheel="@(e => { OnWheel(e, xLoc, yLoc); })"
+            <textarea class="matrixdisplay" @bind="@Matrix[xLoc, yLoc]" @onwheel="@(e => { OnWheel(e, xLoc, yLoc); })"
             style="background: rgb(@red[xLoc, yLoc], @green[xLoc, yLoc], @blue[xLoc, yLoc])"></textarea>
         }
     }
@@ -81,8 +81,11 @@
 }
 
 @code {
+
     private float[,] matrix;
+
     [Parameter]
+    public float[,] DefaultMatrix { get; set; }
     public float[,] Matrix {
         get => matrix;
         set {
@@ -125,7 +128,7 @@
     }
 
     protected override void OnInitialized() {
-        ResetColors();
+        Matrix = DefaultMatrix;
         base.OnInitialized();
     }
 
