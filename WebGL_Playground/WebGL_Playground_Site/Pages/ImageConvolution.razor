@@ -29,15 +29,15 @@
     <button @onclick="RemoveKernel">Remove</button>
 </div>
 <br/>
-<BECanvas Width="200" Height="900" @ref="canvasReference"></BECanvas>
-<br/>
 <NumberInput @ref="TimeStepInput" DefaultValue="0.005"/>
 <button @onclick="Interpolate">Interpolate</button>
 <br/>
 <input type="range" @bind="Time" min="0" max="1" step="0.01"/>
 <br/>
 <input type="checkbox" @bind="TimeReturn"> Return
-<br/>
+<div style="position:absolute; top: 80px; left: 575px">
+    <BECanvas Width="200" Height="900" @ref="canvasReference"></BECanvas>
+</div>
 
 @code {
 
@@ -140,7 +140,7 @@
     }
     private Task InterpolateTask;
     private bool ContinueInterpolation = false;
-    private bool TimeReturn = true;
+    private bool TimeReturn = false;
     private float timeStep = 0.005f;
 
     protected async Task Interpolate() {
