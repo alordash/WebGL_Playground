@@ -25,7 +25,7 @@
     <input type="text" @bind="NewKernelName" placeholder="New kernel name"/>
     <br/>
     <button @onclick="AddKernel">Add</button>
-    <button>Remove</button>
+    <button @onclick="RemoveKernel">Remove</button>
 </div>
 <br/>
 <BECanvas Width="200" Height="900" @ref="canvasReference"></BECanvas>
@@ -48,6 +48,13 @@
     private async Task AddKernel() {
         UsingKernels.Add(NewKernelName, ConvolutionKernels.MatrixToArray(KernelDisplay.Matrix));
         NewKernelName = String.Empty;
+        await FillKernels();
+    }
+
+    private async Task RemoveKernel() {
+        if (!UsingKernels.Remove(currentKernel)) {
+            Console.WriteLine($"Error removing kernel \"{currentKernel}\"");
+        }
         await FillKernels();
     }
 
