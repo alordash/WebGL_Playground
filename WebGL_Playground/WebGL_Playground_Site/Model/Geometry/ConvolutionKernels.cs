@@ -23,8 +23,8 @@ namespace WebGL_Playground_Site.Geometry {
             var h = matrix.GetLength(1);
             var index = 0;
             var arr = new T[w * h];
-            for (int i = 0; i < w; i++) {
-                for (int j = 0; j < h; j++) {
+            for (int j = 0; j < h; j++) {
+                for (int i = 0; i < w; i++) {
                     arr[index++] = matrix[i, j];
                 }
             }
