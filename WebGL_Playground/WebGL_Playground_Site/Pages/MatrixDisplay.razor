@@ -108,7 +108,6 @@
         if (Math.Abs(v) <= zeroThreshold) {
             v = 0f;
         }
-        v = (float)Math.Truncate(v * 10f) / 10f;
         matrix[x, y] = v;
         SetColors(v, x, y);
         if (OnChangeCallback != null) {
