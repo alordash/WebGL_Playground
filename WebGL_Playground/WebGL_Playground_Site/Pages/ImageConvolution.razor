@@ -25,6 +25,7 @@
     <input type="text" @bind="NewKernelName" placeholder="New kernel name"/>
     <br/>
     <button @onclick="AddKernel">Add</button>
+    <button @onclick="OverwriteKernel">Overwrite</button>
     <button @onclick="RemoveKernel">Remove</button>
 </div>
 <br/>
@@ -34,6 +35,8 @@
 <button @onclick="Interpolate">Interpolate</button>
 <br/>
 <input type="range" @bind="Time" min="0" max="1" step="0.01"/>
+<br/>
+<input type="checkbox" @bind="TimeReturn"> Return
 <br/>
 
 @code {
@@ -49,6 +52,12 @@
         UsingKernels.Add(NewKernelName, ConvolutionKernels.MatrixToArray(KernelDisplay.Matrix));
         NewKernelName = String.Empty;
         await FillKernels();
+    }
+    
+    private async Task OverwriteKernel() {
+        UsingKernels[currentKernel] = ConvolutionKernels.MatrixToArray(KernelDisplay.Matrix);
+        await FillKernels();
+        await LightDraw();
     }
 
     private async Task RemoveKernel() {
@@ -125,6 +134,7 @@
     }
     private Task InterpolateTask;
     private bool ContinueInterpolation = true;
+    private bool TimeReturn = true;
     private float timeStep = 0.005f;
 
     protected async Task Interpolate() {
@@ -144,7 +154,12 @@
                 var newTime = Time + timeStep;
                 switch (newTime) {
                     case > 1f:
-                        newTime = 0f;
+                        if (TimeReturn) {
+                            newTime = 0f;   
+                        } else {
+                            timeStep = -timeStep;
+                            newTime = Time + timeStep;
+                        }
                         break;
                     case < 0f:
                         timeStep = -timeStep;
