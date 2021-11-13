@@ -8,11 +8,12 @@
     height: 40px;
     font-size: .8rem;
     letter-spacing: 1px;
-    line-height: 37px;
+    line-height: 40px;
     padding: 1px;
     padding-top: 0px;
     border: 1px solid #ccc;
     box-shadow: 1px 1px 1px #999;
     resize: none;
     text-align: center;
+    overflow: hidden;
 }

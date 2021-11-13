@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace WebGL_Playground_Site.Geometry {
     public static class ConvolutionKernels {
-        public static float[,] KernelToMatrix(float[] kernel, int width, int height) {
+        public static float[,] ArrayOfArraysToMatrix(float[] kernel, int width, int height) {
             if (kernel.Length < width * height) {
                 throw new ArgumentOutOfRangeException();
             }

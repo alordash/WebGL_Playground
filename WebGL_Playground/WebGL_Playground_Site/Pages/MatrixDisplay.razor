@@ -1,16 +1,32 @@
 ﻿@using System.Globalization
+@using WebGL_Playground_Site.Geometry
 
 <div class="grid">
     @for (int y = 0; y < Height; y++) {
         var yLoc = y;
         @for (int x = 0; x < Width; x++) {
             var xLoc = x;
-            <textarea class="matrixdisplay" @bind="Matrix[xLoc, yLoc]" @onwheel="OnWheel"></textarea>
+            <textarea class="matrixdisplay" @bind="Matrix[xLoc, yLoc]" @onwheel="@(e => { OnWheel(e, xLoc, yLoc); })"
+            style="background: rgb(@red[xLoc, yLoc], @green[xLoc, yLoc], @blue[xLoc, yLoc])"></textarea>
         }
     }
 </div>
 
 @code {
+
+    private static readonly float[,] emptyColors = new float[3, 3] {
+        {
+            255, 255, 255
+        }, {
+            255, 255, 255
+        }, {
+            255, 255, 255
+        },
+    };
+
+    private float[,] red = (float[,])emptyColors.Clone();
+    private float[,] green = (float[,])emptyColors.Clone();
+    private float[,] blue = (float[,])emptyColors.Clone();
 
     private float[,] matrix;
     [Parameter]
@@ -19,9 +35,13 @@
         set { matrix = value; }
     }
 
-    public void OnWheel(WheelEventArgs wE) {
-        Console.WriteLine($"Wheel event = \"{wE.ToString()}\"");
-        wE.DeltaY = 0.0;
+    public void OnWheel(WheelEventArgs wE, int x, int y) {
+        var v = -(float)wE.DeltaY;
+        matrix[x, y] += v / 250.0f;
+
+        red[x, y] += v % 155f;
+    //        blue[x, y] += v + 12f;
+    //        green[x, y] += v / 200f;
     }
 
     private int width;
