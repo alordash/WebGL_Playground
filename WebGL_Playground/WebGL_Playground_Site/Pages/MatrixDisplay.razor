@@ -14,7 +14,7 @@
 
 @code {
 
-    private static readonly float[,] emptyColors = new float[3, 3] {
+    private static readonly int[,] emptyColors = new int[3, 3] {
         {
             255, 255, 255
         }, {
@@ -24,22 +24,76 @@
         },
     };
 
-    private float[,] red = (float[,])emptyColors.Clone();
-    private float[,] green = (float[,])emptyColors.Clone();
-    private float[,] blue = (float[,])emptyColors.Clone();
+    private int[,] red = (int[,])emptyColors.Clone();
+    private int[,] green = (int[,])emptyColors.Clone();
+    private int[,] blue = (int[,])emptyColors.Clone();
 
+    
+    private static readonly float[] boundaries = {
+        -2f, 0f, 2f
+    };
+
+    private static readonly int[] reds = {
+        157, 240, 255
+    };
+
+    private static readonly int[] greens = {
+        176, 243, 172
+    };
+
+    private static readonly int[] blues = {
+        205, 190, 147
+    };
+
+    private static int GetColorMix(float v, int[] colors) {
+        var l = boundaries.Length;
+        for (int i = 0; i < l - 1; i++) {
+            var prev = boundaries[i];
+            var next = boundaries[i + 1];
+            var less = v < prev;
+            var greater = v > next;
+            if (less && i == 0) {
+                return colors[i];
+            } else if (greater && i == l - 2) {
+                return colors[l - 1];
+            } else if (!less && !greater) {
+                return (int)((colors[i] + colors[i + 1]) / 2f);
+            }
+        }
+        return 0;
+    }
+
+    private void SetColors(float v, int x, int y) {
+        red[x, y] = GetColorMix(v, reds);
+        green[x, y] = GetColorMix(v, greens);
+        blue[x, y] = GetColorMix(v, blues);
+    }
+}
+
+@code {
     private float[,] matrix;
     [Parameter]
     public float[,] Matrix {
         get => matrix;
-        set { matrix = value; }
+        set => matrix = value;
     }
 
-    public void OnWheel(WheelEventArgs wE, int x, int y) {
-        var v = -(float)wE.DeltaY;
-        matrix[x, y] += v / 250.0f;
+        private const float zeroThreshold = 0.15f;
+        private const float scrollDecrease = 500f;
 
-        red[x, y] += v % 155f;
+    private void SetValue(float v, int x, int y) {
+        v += matrix[x, y];
+        if (Math.Abs(v) <= zeroThreshold) {
+            v = 0f;
+        }
+        Console.WriteLine($"v = {v.ToString()}");
+        matrix[x, y] = v;
+        SetColors(v, x, y);
+    }
+
+    private void OnWheel(WheelEventArgs wE, int x, int y) {
+        var v = -(float)wE.DeltaY / scrollDecrease;
+        SetValue(v, x, y);
     //        blue[x, y] += v + 12f;
     //        green[x, y] += v / 200f;
     }
