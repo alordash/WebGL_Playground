@@ -2,16 +2,27 @@
 
 <div class="grid">
     @for (int y = 0; y < Height; y++) {
+        var yLoc = y;
         @for (int x = 0; x < Width; x++) {
-            <textarea class="matrixdisplay" @bind="Matrix[x, y]"></textarea>
+            var xLoc = x;
+            <textarea class="matrixdisplay" @bind="Matrix[xLoc, yLoc]" @onwheel="OnWheel"></textarea>
         }
     }
 </div>
 
 @code {
 
+    private float[,] matrix;
     [Parameter]
-    public float[,] Matrix { get; set; }
+    public float[,] Matrix {
+        get => matrix;
+        set { matrix = value; }
+    }
+
+    public void OnWheel(WheelEventArgs wE) {
+        Console.WriteLine($"Wheel event = \"{wE.ToString()}\"");
+        wE.DeltaY = 0.0;
+    }
 
     private int width;
     public int Width {
