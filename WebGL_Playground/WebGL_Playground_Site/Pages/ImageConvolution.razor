@@ -28,11 +28,11 @@
 <br/>
 <input type="range" @bind="Time" min="0" max="1" step="0.01"/>
 <br/>
-<MatrixDisplay @ref="asdasd" Matrix="ConvolutionKernels.ArrayOfArraysToMatrix(UsingKernels.Values.ToArray()[0], 3, 3)"></MatrixDisplay>
+<MatrixDisplay @ref="KernelDisplay" Matrix="ConvolutionKernels.ArrayOfArraysToMatrix(UsingKernels.Values.ToArray()[0], 3, 3)"></MatrixDisplay>
 
 @code {
 
-    MatrixDisplay asdasd;
+    MatrixDisplay KernelDisplay;
 
     public static readonly Dictionary<string, float[]> UsingKernels = ConvolutionKernels.MyKernels;
     private readonly float k = UsingKernels.Count - 1;
@@ -53,6 +53,8 @@
             var index = UsingKernels.Keys.ToList().IndexOf(currentKernel);
             time = index / k - 0.001f;
             Console.WriteLine($"index = {index}, time = {time}");
+            var vals = UsingKernels[value];
+            KernelDisplay.Matrix = ConvolutionKernels.ArrayOfArraysToMatrix(vals, 3, 3);
             Draw();
         }
     }

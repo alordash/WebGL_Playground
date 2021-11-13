@@ -70,6 +70,14 @@
         green[x, y] = GetColorMix(v, greens);
         blue[x, y] = GetColorMix(v, blues);
     }
+
+    private void ResetColors() {
+        for (int x = 0; x < 3; x++) {
+            for (int y = 0; y < 3; y++) {
+                SetColors(matrix[x, y], x, y);
+            }
+        }
+    }
 }
 
 @code {
@@ -77,7 +85,10 @@
     [Parameter]
     public float[,] Matrix {
         get => matrix;
-        set => matrix = value;
+        set {
+            matrix = value;
+            ResetColors();
+        }
     }
 
         private const float zeroThreshold = 0.05f;
@@ -114,11 +125,7 @@
     }
 
     protected override void OnInitialized() {
-        for (int x = 0; x < 3; x++) {
-            for (int y = 0; y < 3; y++) {
-                SetColors(matrix[x, y], x, y);
-            }
-        }
+        ResetColors();
         base.OnInitialized();
     }
 
