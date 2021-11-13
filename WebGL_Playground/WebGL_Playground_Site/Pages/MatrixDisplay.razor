@@ -6,8 +6,8 @@
         var yLoc = y;
         @for (int x = 0; x < Width; x++) {
             var xLoc = x;
-            <input type="number" class="matrixdisplay" @bind="@Matrix[xLoc, yLoc]" @onwheel="@(e => { OnWheel(e, xLoc, yLoc); })"
-                   style="background: rgb(@red[xLoc, yLoc], @green[xLoc, yLoc], @blue[xLoc, yLoc])" />
+            <input type="number" class="matrixdisplay" value="@Matrix[xLoc, yLoc].ToString("0.0")" @onchange="@(e => OnChange(e, xLoc, yLoc))" @onwheel="@(e => OnWheel(e, xLoc, yLoc))"
+                   style="background: rgb(@red[xLoc, yLoc], @green[xLoc, yLoc], @blue[xLoc, yLoc])"/>
         }
     }
 </div>
@@ -28,7 +28,6 @@
     private int[,] green = (int[,])emptyColors.Clone();
     private int[,] blue = (int[,])emptyColors.Clone();
 
-    
     private static readonly float[] boundaries = {
         -2f, 0f, 2f
     };
@@ -78,6 +77,7 @@
             }
         }
     }
+
 }
 
 @code {
@@ -86,6 +86,10 @@
 
     [Parameter]
     public float[,] DefaultMatrix { get; set; }
+
+    [Parameter]
+    public Func<float, int, int, Task> OnChangeCallback { get; set; }
+
     public float[,] Matrix {
         get => matrix;
         set {
@@ -94,22 +98,31 @@
         }
     }
 
-        private const float zeroThreshold = 0.05f;
-        private const float scrollDecrease = 1500f;
+        private const float zeroThreshold = 0.1f;
+        private const float scrollDecrease = 1000f;
 
-    private void SetValue(float v, int x, int y) {
-        v += matrix[x, y];
+    private void SetValue(float v, int x, int y, bool preSum = false) {
+        if (preSum) {
+            v += matrix[x, y];
+        }
         if (Math.Abs(v) <= zeroThreshold) {
             v = 0f;
         }
-        Console.WriteLine($"v = {v.ToString()}");
+        v = (float)Math.Truncate(v * 10f) / 10f;
         matrix[x, y] = v;
         SetColors(v, x, y);
+        if (OnChangeCallback != null) {
+            OnChangeCallback(v, x, y);   
+        }
+    }
+
+    private void OnChange(ChangeEventArgs e, int x, int y) {
+        SetValue(e.Value is string strVal ? float.Parse(strVal) : (float)e.Value, x, y);
     }
 
     private void OnWheel(WheelEventArgs wE, int x, int y) {
         var v = -(float)wE.DeltaY / scrollDecrease;
-        SetValue(v, x, y);
+        SetValue(v, x, y, true);
     }
 
     private int width;

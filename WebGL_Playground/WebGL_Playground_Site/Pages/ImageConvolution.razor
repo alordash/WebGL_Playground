@@ -21,7 +21,7 @@
 </select>
 <input type="checkbox" @bind="ShowOriginal"> Show original
 <div style="position:relative;">
-    <MatrixDisplay @ref="KernelDisplay" DefaultMatrix="ConvolutionKernels.ArrayToMatrix(UsingKernels.Values.ToArray()[0], 3, 3)"></MatrixDisplay>
+    <MatrixDisplay @ref="KernelDisplay" OnChangeCallback="OnKernelChangeCallbak" DefaultMatrix="ConvolutionKernels.ArrayToMatrix(UsingKernels.Values.ToArray()[0], 3, 3)"></MatrixDisplay>
     <input type="text" @bind="NewKernelName" placeholder="New kernel name"/>
     <br/>
     <button @onclick="AddKernel">Add</button>
@@ -44,7 +44,7 @@
     MatrixDisplay KernelDisplay;
 
     public static readonly Dictionary<string, float[]> UsingKernels = ConvolutionKernels.MyKernels;
-    private float k = UsingKernels.Count - 1;
+    private float kernelPlotsCount = UsingKernels.Count - 1;
 
     public string NewKernelName { get; set; } = "MyKernel";
 
@@ -53,7 +53,7 @@
         NewKernelName = String.Empty;
         await FillKernels();
     }
-    
+
     private async Task OverwriteKernel() {
         UsingKernels[currentKernel] = ConvolutionKernels.MatrixToArray(KernelDisplay.Matrix);
         await FillKernels();
@@ -65,6 +65,12 @@
             Console.WriteLine($"Error removing kernel \"{currentKernel}\"");
         }
         await FillKernels();
+    }
+
+    private async Task OnKernelChangeCallbak(float v, int x, int y) {
+        if (!ContinueInterpolation) {
+            await OverwriteKernel();
+        }
     }
 
     private BECanvasComponent canvasReference;
@@ -80,7 +86,7 @@
         set {
             currentKernel = value;
             var index = UsingKernels.Keys.ToList().IndexOf(currentKernel);
-            time = index / k - 0.001f;
+            time = index / kernelPlotsCount - 0.001f;
             Console.WriteLine($"index = {index}, time = {time}");
             KernelDisplay.Matrix = ConvolutionKernels.ArrayToMatrix(UsingKernels[value], 3, 3);
             Draw();
@@ -133,7 +139,7 @@
         }
     }
     private Task InterpolateTask;
-    private bool ContinueInterpolation = true;
+    private bool ContinueInterpolation = false;
     private bool TimeReturn = true;
     private float timeStep = 0.005f;
 
@@ -155,7 +161,7 @@
                 switch (newTime) {
                     case > 1f:
                         if (TimeReturn) {
-                            newTime = 0f;   
+                            newTime = 0f;
                         } else {
                             timeStep = -timeStep;
                             newTime = Time + timeStep;
@@ -175,7 +181,7 @@
     private async Task FillKernels() {
         var arrs = UsingKernels.Values.ToArray();
         var kernels = arrs.SelectMany(x => x).ToArray();
-        await glDrawer.FillUniformF("u_k", k = arrs.Length - 1);
+        await glDrawer.FillUniformF("u_k", kernelPlotsCount = arrs.Length - 1);
         await glDrawer.FillUniformArrayF("u_kernels", kernels, 1);
         Console.WriteLine($"Kernels count = {kernels.Length}");
     }
