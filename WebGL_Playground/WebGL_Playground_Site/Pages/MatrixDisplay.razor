@@ -34,15 +34,15 @@
     };
 
     private static readonly int[] reds = {
-        157, 240, 255
+        87, 169, 255
     };
 
     private static readonly int[] greens = {
-        176, 243, 172
+        141, 233, 172
     };
 
     private static readonly int[] blues = {
-        205, 190, 147
+        221, 174, 147
     };
 
     private static int GetColorMix(float v, int[] colors) {
@@ -57,7 +57,9 @@
             } else if (greater && i == l - 2) {
                 return colors[l - 1];
             } else if (!less && !greater) {
-                return (int)((colors[i] + colors[i + 1]) / 2f);
+                var mNext = (v - prev) / 2f;
+                var mPrev = 1f - mNext;
+                return (int)(mPrev * colors[i] + mNext * colors[i + 1]);
             }
         }
         return 0;
@@ -78,8 +80,8 @@
         set => matrix = value;
     }
 
-        private const float zeroThreshold = 0.15f;
-        private const float scrollDecrease = 500f;
+        private const float zeroThreshold = 0.05f;
+        private const float scrollDecrease = 1500f;
 
     private void SetValue(float v, int x, int y) {
         v += matrix[x, y];
@@ -94,8 +96,6 @@
     private void OnWheel(WheelEventArgs wE, int x, int y) {
         var v = -(float)wE.DeltaY / scrollDecrease;
         SetValue(v, x, y);
-    //        blue[x, y] += v + 12f;
-    //        green[x, y] += v / 200f;
     }
 
     private int width;
@@ -111,6 +111,15 @@
     protected override void OnParametersSet() {
         width = Matrix.GetLength(0);
         height = Matrix.GetLength(1);
+    }
+
+    protected override void OnInitialized() {
+        for (int x = 0; x < 3; x++) {
+            for (int y = 0; y < 3; y++) {
+                SetColors(matrix[x, y], x, y);
+            }
+        }
+        base.OnInitialized();
     }
 
 }
