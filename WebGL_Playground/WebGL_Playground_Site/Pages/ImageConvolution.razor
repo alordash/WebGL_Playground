@@ -41,7 +41,7 @@
     MatrixDisplay KernelDisplay;
 
     public static readonly Dictionary<string, float[]> UsingKernels = ConvolutionKernels.MyKernels;
-    private readonly float k = UsingKernels.Count - 1;
+    private float k = UsingKernels.Count - 1;
 
     public string NewKernelName { get; set; } = "MyKernel";
 
@@ -151,8 +151,9 @@
     }
 
     private async Task FillKernels() {
-        var kernels = UsingKernels.Values.SelectMany(x => x).ToArray();
-        await glDrawer.FillUniformF("u_k", k);
+        var arrs = UsingKernels.Values.ToArray();
+        var kernels = arrs.SelectMany(x => x).ToArray();
+        await glDrawer.FillUniformF("u_k", k = arrs.Length - 1);
         await glDrawer.FillUniformArrayF("u_kernels", kernels, 1);
         Console.WriteLine($"Kernels count = {kernels.Length}");
     }
