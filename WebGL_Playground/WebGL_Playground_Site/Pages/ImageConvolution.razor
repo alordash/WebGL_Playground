@@ -21,7 +21,7 @@
 </select>
 <input type="checkbox" @bind="ShowOriginal"> Show original
 <div style="position:relative;">
-    <MatrixDisplay @ref="KernelDisplay" OnChangeCallback="OnKernelChangeCallbak" DefaultMatrix="ConvolutionKernels.ArrayToMatrix(UsingKernels.Values.ToArray()[0], 3, 3)"></MatrixDisplay>
+    <MatrixDisplay @ref="KernelDisplay" OnChangeCallback="OnKernelChangeCallbak" DefaultMatrix="ConvolutionKernels.ArrayToMatrix(UsingKernels.Values.First(), 3, 3)"></MatrixDisplay>
     <input type="text" @bind="NewKernelName" placeholder="New kernel name"/>
     <br/>
     <button @onclick="AddKernel">Add</button>
@@ -43,7 +43,7 @@
 
     MatrixDisplay KernelDisplay;
 
-    public static readonly Dictionary<string, float[]> UsingKernels = ConvolutionKernels.MyKernels;
+    public static readonly Dictionary<string, float[]> UsingKernels = ConvolutionKernels.DefaultKernels;
     private float kernelPlotsCount = UsingKernels.Count - 1;
 
     public string NewKernelName { get; set; } = "MyKernel";
@@ -64,7 +64,9 @@
         if (!UsingKernels.Remove(currentKernel)) {
             Console.WriteLine($"Error removing kernel \"{currentKernel}\"");
         }
+        currentKernel = UsingKernels.Keys.First();
         await FillKernels();
+        await LightDraw();
     }
 
     private async Task OnKernelChangeCallbak(float v, int x, int y) {
@@ -80,7 +82,7 @@
 
     private string imagePath = "Data/image2.jpg";
 
-    private string currentKernel = UsingKernels.Keys.ToArray()[0];
+    private string currentKernel = UsingKernels.Keys.First();
     public string CurrentKernel {
         get => currentKernel;
         set {
@@ -148,6 +150,8 @@
         if (InterpolateTask is not null) {
             ContinueInterpolation = !ContinueInterpolation;
             return;
+        } else {
+            ContinueInterpolation = true;
         }
         InterpolateTask = Task.Run(async () => {
             var interval = (int)(3000 * timeStep);
