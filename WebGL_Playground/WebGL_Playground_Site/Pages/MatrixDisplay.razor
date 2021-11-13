@@ -6,8 +6,8 @@
         var yLoc = y;
         @for (int x = 0; x < Width; x++) {
             var xLoc = x;
-            <textarea class="matrixdisplay" @bind="@Matrix[xLoc, yLoc]" @onwheel="@(e => { OnWheel(e, xLoc, yLoc); })"
-            style="background: rgb(@red[xLoc, yLoc], @green[xLoc, yLoc], @blue[xLoc, yLoc])"></textarea>
+            <input type="number" class="matrixdisplay" @bind="@Matrix[xLoc, yLoc]" @onwheel="@(e => { OnWheel(e, xLoc, yLoc); })"
+                   style="background: rgb(@red[xLoc, yLoc], @green[xLoc, yLoc], @blue[xLoc, yLoc])" />
         }
     }
 </div>

@@ -18,8 +18,15 @@
     @foreach (var key in UsingKernels.Keys) {
         <option value="@key">@key</option>
     }
-</select> 
+</select>
 <input type="checkbox" @bind="ShowOriginal"> Show original
+<div style="position:relative;">
+    <MatrixDisplay @ref="KernelDisplay" DefaultMatrix="ConvolutionKernels.ArrayToMatrix(UsingKernels.Values.ToArray()[0], 3, 3)"></MatrixDisplay>
+    <input type="text" @bind="NewKernelName" placeholder="New kernel name"/>
+    <br/>
+    <button @onclick="AddKernel">Add</button>
+    <button>Remove</button>
+</div>
 <br/>
 <BECanvas Width="200" Height="900" @ref="canvasReference"></BECanvas>
 <br/>
@@ -28,7 +35,6 @@
 <br/>
 <input type="range" @bind="Time" min="0" max="1" step="0.01"/>
 <br/>
-<MatrixDisplay @ref="KernelDisplay" DefaultMatrix="ConvolutionKernels.ArrayOfArraysToMatrix(UsingKernels.Values.ToArray()[0], 3, 3)"></MatrixDisplay>
 
 @code {
 
@@ -36,8 +42,15 @@
 
     public static readonly Dictionary<string, float[]> UsingKernels = ConvolutionKernels.MyKernels;
     private readonly float k = UsingKernels.Count - 1;
-    private readonly float[] kernels = UsingKernels.Values.SelectMany(x => x).ToArray();
-    
+
+    public string NewKernelName { get; set; } = "MyKernel";
+
+    private async Task AddKernel() {
+        UsingKernels.Add(NewKernelName, ConvolutionKernels.MatrixToArray(KernelDisplay.Matrix));
+        NewKernelName = String.Empty;
+        await FillKernels();
+    }
+
     private BECanvasComponent canvasReference;
 
     private WebGLContext gl;
@@ -53,8 +66,7 @@
             var index = UsingKernels.Keys.ToList().IndexOf(currentKernel);
             time = index / k - 0.001f;
             Console.WriteLine($"index = {index}, time = {time}");
-            var vals = UsingKernels[value];
-            KernelDisplay.Matrix = ConvolutionKernels.ArrayOfArraysToMatrix(vals, 3, 3);
+            KernelDisplay.Matrix = ConvolutionKernels.ArrayToMatrix(UsingKernels[value], 3, 3);
             Draw();
         }
     }
@@ -138,6 +150,13 @@
         });
     }
 
+    private async Task FillKernels() {
+        var kernels = UsingKernels.Values.SelectMany(x => x).ToArray();
+        await glDrawer.FillUniformF("u_k", k);
+        await glDrawer.FillUniformArrayF("u_kernels", kernels, 1);
+        Console.WriteLine($"Kernels count = {kernels.Length}");
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender) {
         if (firstRender) {
             gl = GLContext.GL = await canvasReference.CreateWebGLAsync(new WebGLContextAttributes {
@@ -152,11 +171,8 @@
             await gl.UseProgramAsync(glProgram);
             await glDrawer.ClearWithColor(0.5f, 0.5f, 0.5f, 1f);
 
-            var kernels = UsingKernels.Values.SelectMany(x => x).ToArray();
-            await glDrawer.FillUniformF("u_k", k);
-            await glDrawer.FillUniformArrayF("u_kernels", kernels, 1);
-            Console.WriteLine($"Kernels count = {kernels.Length}");
-            Draw();
+            await FillKernels();
+            await Draw();
         }
     }
 

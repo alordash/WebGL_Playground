@@ -3,11 +3,12 @@ using System.Collections.Generic;
 
 namespace WebGL_Playground_Site.Geometry {
     public static class ConvolutionKernels {
-        public static float[,] ArrayOfArraysToMatrix(float[] kernel, int width, int height) {
+        public static T[,] ArrayToMatrix<T>(T[] kernel, int width, int height) {
             if (kernel.Length < width * height) {
                 throw new ArgumentOutOfRangeException();
             }
-            float[,] matrix = new float[width, height];
+
+            T[,] matrix = new T[width, height];
             for (int i = 0; i < width; i++) {
                 for (int j = 0; j < height; j++) {
                     matrix[i, j] = kernel[j * height + i];
@@ -15,6 +16,20 @@ namespace WebGL_Playground_Site.Geometry {
             }
 
             return matrix;
+        }
+
+        public static T[] MatrixToArray<T>(T[,] matrix) {
+            var w = matrix.GetLength(0);
+            var h = matrix.GetLength(1);
+            var index = 0;
+            var arr = new T[w * h];
+            for (int i = 0; i < w; i++) {
+                for (int j = 0; j < h; j++) {
+                    arr[index++] = matrix[i, j];
+                }
+            }
+
+            return arr;
         }
 
         public static readonly Dictionary<string, float[]> DefaultKernels = new Dictionary<string, float[]>() {
