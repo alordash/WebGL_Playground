@@ -43,7 +43,7 @@
 
     MatrixDisplay KernelDisplay;
 
-    public static readonly Dictionary<string, float[]> UsingKernels = ConvolutionKernels.DefaultKernels;
+    public static readonly Dictionary<string, float[]> UsingKernels = ConvolutionKernels.MyKernels;
     private float kernelPlotsCount = UsingKernels.Count - 1;
 
     public string NewKernelName { get; set; } = "MyKernel";
